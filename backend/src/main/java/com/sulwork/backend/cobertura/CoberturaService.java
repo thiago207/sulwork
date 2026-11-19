@@ -57,7 +57,7 @@ public class CoberturaService {
     }
 
     // fração de 0 a 1 vira percentual com uma casa: 0.625 -> 62.5
-    static BigDecimal percentual(double fracao) {
+    public static BigDecimal percentual(double fracao) {
         return BigDecimal.valueOf(fracao * 100).setScale(1, RoundingMode.HALF_UP);
     }
 }
