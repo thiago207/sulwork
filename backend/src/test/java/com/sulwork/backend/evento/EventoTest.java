@@ -250,6 +250,35 @@ class EventoTest {
     }
 
     @Nested
+    class AlteracoesAbertas {
+
+        @Test
+        void permiteComEventoAbertoAntesDoPrazo() {
+            eventoNoStatus(ABERTO).exigirAlteracoesAbertas(PRAZO.minusMinutes(1));
+        }
+
+        @ParameterizedTest
+        @EnumSource(value = StatusEvento.class, names = "ABERTO", mode = EnumSource.Mode.EXCLUDE)
+        void bloqueiaForaDeAberto(StatusEvento status) {
+            var evento = eventoNoStatus(status);
+
+            assertThatThrownBy(() -> evento.exigirAlteracoesAbertas(AGORA))
+                    .isInstanceOf(RegraNegocioException.class)
+                    .hasMessage("O evento precisa estar ABERTO para esta alteração. Status atual: " + status + ".");
+        }
+
+        @Test
+        void bloqueiaNoPrazoOuDepois() {
+            var evento = eventoNoStatus(ABERTO);
+
+            assertThatThrownBy(() -> evento.exigirAlteracoesAbertas(PRAZO))
+                    .hasMessage("O prazo de alterações do evento já venceu.");
+            assertThatThrownBy(() -> evento.exigirAlteracoesAbertas(DEPOIS_DO_PRAZO))
+                    .hasMessage("O prazo de alterações do evento já venceu.");
+        }
+    }
+
+    @Nested
     class Exclusao {
 
         @Test
