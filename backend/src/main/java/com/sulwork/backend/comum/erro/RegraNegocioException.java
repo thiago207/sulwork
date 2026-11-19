@@ -1,9 +1,10 @@
 package com.sulwork.backend.comum.erro;
 
-/** Violação de regra de negócio. Vira HTTP 422. */
-public class RegraNegocioException extends RuntimeException {
+import org.springframework.http.HttpStatus;
+
+public class RegraNegocioException extends ExcecaoApi {
 
     public RegraNegocioException(String mensagem) {
-        super(mensagem);
+        super(HttpStatus.UNPROCESSABLE_CONTENT, mensagem);
     }
 }

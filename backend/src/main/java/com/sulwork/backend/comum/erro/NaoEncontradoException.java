@@ -1,9 +1,10 @@
 package com.sulwork.backend.comum.erro;
 
-/** Recurso não encontrado. Vira HTTP 404. */
-public class NaoEncontradoException extends RuntimeException {
+import org.springframework.http.HttpStatus;
+
+public class NaoEncontradoException extends ExcecaoApi {
 
     public NaoEncontradoException(String mensagem) {
-        super(mensagem);
+        super(HttpStatus.NOT_FOUND, mensagem);
     }
 }

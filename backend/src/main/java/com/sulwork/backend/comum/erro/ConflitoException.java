@@ -1,9 +1,10 @@
 package com.sulwork.backend.comum.erro;
 
-/** Conflito com um registro existente (duplicidade). Vira HTTP 409. */
-public class ConflitoException extends RuntimeException {
+import org.springframework.http.HttpStatus;
+
+public class ConflitoException extends ExcecaoApi {
 
     public ConflitoException(String mensagem) {
-        super(mensagem);
+        super(HttpStatus.CONFLICT, mensagem);
     }
 }
