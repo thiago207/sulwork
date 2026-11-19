@@ -1,6 +1,7 @@
 package com.sulwork.backend.participacao;
 
 import com.sulwork.backend.comum.erro.NaoEncontradoException;
+import com.sulwork.backend.contribuicao.ContribuicaoRepository;
 import com.sulwork.backend.evento.EventoService;
 import com.sulwork.backend.participacao.dto.ParticipacaoResposta;
 import com.sulwork.backend.participante.ParticipanteMapper;
@@ -20,6 +21,7 @@ public class ParticipacaoService {
     private final ParticipacaoRepository repository;
     private final EventoService eventoService;
     private final ParticipanteService participanteService;
+    private final ContribuicaoRepository contribuicaoRepository;
     private final Clock relogio;
 
     @Transactional
@@ -46,7 +48,8 @@ public class ParticipacaoService {
         var participacao = repository.findByEventoIdAndParticipanteId(eventoId, participanteId)
                 .filter(Participacao::isAtivo)
                 .orElseThrow(() -> new NaoEncontradoException("O participante não está neste evento."));
-        // as contribuições dele serão desativadas aqui na etapa 5
+        // regra 5: sair desativa também as contribuições; se voltar, elas continuam inativas
+        contribuicaoRepository.desativarDaParticipacao(participacao.getId());
         participacao.sair();
     }
 
