@@ -52,10 +52,7 @@ public class Evento {
 
     public void editar(String nome, String descricao, TipoEvento tipo,
                        LocalDateTime dataHora, LocalDateTime prazoAlteracoes, LocalDateTime agora) {
-        if (status != RASCUNHO && status != ABERTO) {
-            throw new RegraNegocioException(
-                    "O evento só pode ser editado com status RASCUNHO ou ABERTO. Status atual: " + status + ".");
-        }
+        exigirEdicaoPermitida();
         // só a data que mudou precisa estar no futuro
         if (!dataHora.equals(this.dataHora)) {
             exigirFuturo(dataHora, agora, "A data e hora do evento deve estar no futuro.");
@@ -79,6 +76,14 @@ public class Evento {
             throw new RegraNegocioException("Não é possível reabrir o evento: o prazo de alterações já venceu.");
         }
         this.status = destino;
+    }
+
+    // vale para os dados do evento, categorias e itens
+    public void exigirEdicaoPermitida() {
+        if (status != RASCUNHO && status != ABERTO) {
+            throw new RegraNegocioException(
+                    "O evento só pode ser editado com status RASCUNHO ou ABERTO. Status atual: " + status + ".");
+        }
     }
 
     // regra 2: entrar, sair e mexer em contribuições só com ABERTO e antes do prazo
