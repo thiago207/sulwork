@@ -24,11 +24,24 @@ services:
       DB_URL: jdbc:postgresql://banco:5432/${DB_NOME:-sulwork}
       DB_USUARIO: ${DB_USUARIO:-sulwork}
       DB_SENHA: ${DB_SENHA:-sulwork}
+      CORS_ORIGENS: http://localhost:3000
       TZ: America/Recife
     ports:
       - "8080:8080"
     depends_on:
       banco:
+        condition: service_healthy
+
+  frontend:
+    build:
+      context: ./frontend
+      args:
+        VITE_API_URL: http://localhost:8080
+    container_name: sulwork-frontend
+    ports:
+      - "3000:80"
+    depends_on:
+      backend:
         condition: service_healthy
 
 volumes:
