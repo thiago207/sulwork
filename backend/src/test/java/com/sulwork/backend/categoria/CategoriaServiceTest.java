@@ -11,6 +11,7 @@ import static org.mockito.Mockito.when;
 import com.sulwork.backend.categoria.dto.CategoriaRequisicao;
 import com.sulwork.backend.comum.erro.NaoEncontradoException;
 import com.sulwork.backend.comum.erro.RegraNegocioException;
+import com.sulwork.backend.contribuicao.ContribuicaoRepository;
 import com.sulwork.backend.evento.EventoService;
 import com.sulwork.backend.evento.StatusEvento;
 import com.sulwork.backend.item.ItemRepository;
@@ -34,12 +35,14 @@ class CategoriaServiceTest {
     ItemRepository itemRepository;
     @Mock
     EventoService eventoService;
+    @Mock
+    ContribuicaoRepository contribuicaoRepository;
 
     CategoriaService service;
 
     @BeforeEach
     void configurar() {
-        service = new CategoriaService(repository, itemRepository, eventoService);
+        service = new CategoriaService(repository, itemRepository, eventoService, contribuicaoRepository);
     }
 
     @ParameterizedTest

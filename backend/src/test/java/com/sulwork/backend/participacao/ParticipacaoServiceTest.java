@@ -11,6 +11,7 @@ import com.sulwork.backend.comum.config.RelogioConfig;
 import com.sulwork.backend.comum.erro.ConflitoException;
 import com.sulwork.backend.comum.erro.NaoEncontradoException;
 import com.sulwork.backend.comum.erro.RegraNegocioException;
+import com.sulwork.backend.contribuicao.ContribuicaoRepository;
 import com.sulwork.backend.evento.Evento;
 import com.sulwork.backend.evento.EventoService;
 import com.sulwork.backend.evento.StatusEvento;
@@ -26,6 +27,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.test.util.ReflectionTestUtils;
 
 @ExtendWith(MockitoExtension.class)
 class ParticipacaoServiceTest {
@@ -39,6 +41,8 @@ class ParticipacaoServiceTest {
     EventoService eventoService;
     @Mock
     ParticipanteService participanteService;
+    @Mock
+    ContribuicaoRepository contribuicaoRepository;
 
     Evento evento;
     Participante participante;
@@ -51,7 +55,7 @@ class ParticipacaoServiceTest {
 
     ParticipacaoService serviceEm(LocalDateTime agora) {
         var relogio = Clock.fixed(agora.atZone(RelogioConfig.FUSO).toInstant(), RelogioConfig.FUSO);
-        return new ParticipacaoService(repository, eventoService, participanteService, relogio);
+        return new ParticipacaoService(repository, eventoService, participanteService, contribuicaoRepository, relogio);
     }
 
     void eventoAberto() {
@@ -123,15 +127,17 @@ class ParticipacaoServiceTest {
     }
 
     @Test
-    void sairDesativaAParticipacao() {
+    void sairDesativaAParticipacaoEAsContribuicoes() {
         eventoAberto();
         when(eventoService.buscarEntidade(1L)).thenReturn(evento);
         var participacao = new Participacao(evento, participante);
+        ReflectionTestUtils.setField(participacao, "id", 5L);
         when(repository.findByEventoIdAndParticipanteId(1L, 2L)).thenReturn(Optional.of(participacao));
 
         serviceEm(AGORA).sair(1L, 2L);
 
         assertThat(participacao.isAtivo()).isFalse();
+        verify(contribuicaoRepository).desativarDaParticipacao(5L);
         verify(repository, never()).delete(any());
     }
 

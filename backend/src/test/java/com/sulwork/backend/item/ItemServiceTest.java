@@ -13,6 +13,7 @@ import com.sulwork.backend.categoria.CategoriaService;
 import com.sulwork.backend.categoria.UnidadeMedida;
 import com.sulwork.backend.comum.erro.NaoEncontradoException;
 import com.sulwork.backend.comum.erro.RegraNegocioException;
+import com.sulwork.backend.contribuicao.ContribuicaoRepository;
 import com.sulwork.backend.evento.EventoService;
 import com.sulwork.backend.evento.StatusEvento;
 import com.sulwork.backend.item.dto.ItemRequisicao;
@@ -37,12 +38,14 @@ class ItemServiceTest {
     CategoriaService categoriaService;
     @Mock
     EventoService eventoService;
+    @Mock
+    ContribuicaoRepository contribuicaoRepository;
 
     ItemService service;
 
     @BeforeEach
     void configurar() {
-        service = new ItemService(repository, categoriaService, eventoService);
+        service = new ItemService(repository, categoriaService, eventoService, contribuicaoRepository);
     }
 
     @ParameterizedTest
@@ -53,7 +56,7 @@ class ItemServiceTest {
         when(eventoService.buscarEntidade(1L)).thenReturn(evento);
         when(categoriaService.buscarEntidade(1L, 3L)).thenReturn(salgados);
         when(repository.save(any(Item.class))).thenAnswer(inv -> inv.getArgument(0));
-        when(repository.findByIdAndEvento(9L, 1L)).thenReturn(Optional.of(new Item(salgados, "Coxinha", 10, false, Set.of())));
+        when(repository.findByIdAndEventoComLock(9L, 1L)).thenReturn(Optional.of(new Item(salgados, "Coxinha", 10, false, Set.of())));
 
         var criado = service.criar(1L, REQ);
         var editado = service.editar(1L, 9L, REQ);
@@ -91,7 +94,7 @@ class ItemServiceTest {
         var evento = eventoEm(StatusEvento.ABERTO);
         var item = new Item(new Categoria(evento, "Salgados", 50, UnidadeMedida.UNIDADE), "Coxinha", 10, false, Set.of());
         when(eventoService.buscarEntidade(1L)).thenReturn(evento);
-        when(repository.findByIdAndEvento(9L, 1L)).thenReturn(Optional.of(item));
+        when(repository.findByIdAndEventoComLock(9L, 1L)).thenReturn(Optional.of(item));
 
         service.excluir(1L, 9L);
 

@@ -46,6 +46,27 @@ class ItemTest {
     }
 
     @Test
+    void comContribuicoesNaoMudaParaCategoriaDeOutraUnidade() {
+        var item = item();
+        var garrafas = new Categoria(null, "Garrafas", 5, UnidadeMedida.GARRAFA);
+
+        assertThatThrownBy(() -> item.atualizar(garrafas, "Suco", 6, true, Set.of(), 2))
+                .isInstanceOf(RegraNegocioException.class)
+                .hasMessageContaining("não pode ir para uma categoria de outra unidade");
+        assertThat(item.getCategoria()).isSameAs(bebidas);
+    }
+
+    @Test
+    void semContribuicoesPodeMudarDeUnidade() {
+        var item = item();
+        var garrafas = new Categoria(null, "Garrafas", 5, UnidadeMedida.GARRAFA);
+
+        item.atualizar(garrafas, "Suco", 6, true, Set.of(), 0);
+
+        assertThat(item.getUnidade()).isEqualTo(UnidadeMedida.GARRAFA);
+    }
+
+    @Test
     void atualizarTrocaOsAlergenos() {
         var item = new Item(bebidas, "Vitamina", 2, false, Set.of(Alergeno.LACTOSE));
 
