@@ -34,7 +34,8 @@ public class TratadorGlobalExcecoes {
     }
 
     @ExceptionHandler(HttpMessageNotReadableException.class)
-    public ResponseEntity<ErroResposta> corpoIlegivel() {
+    public ResponseEntity<ErroResposta> corpoIlegivel(HttpMessageNotReadableException ex) {
+        log.debug("Corpo da requisição ilegível", ex);
         return responder(HttpStatus.BAD_REQUEST, "Corpo da requisição inválido ou malformado.");
     }
 
