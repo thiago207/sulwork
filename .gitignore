@@ -1,0 +1,21 @@
+### Claude Code ###
+CLAUDE.md
+
+### Variaveis de ambiente locais ###
+.env
+
+### IDEs ###
+.idea/
+.vscode/
+*.iml
+
+### Sistema operacional ###
+.DS_Store
+Thumbs.db
+
+### Front (etapa 8) ###
+node_modules/
+dist/
+
+### Logs ###
+*.log
