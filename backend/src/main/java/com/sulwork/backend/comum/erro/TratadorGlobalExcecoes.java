@@ -15,6 +15,7 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
+import tools.jackson.databind.exc.MismatchedInputException;
 
 @Slf4j
 @RestControllerAdvice
@@ -36,6 +37,14 @@ public class TratadorGlobalExcecoes {
     @ExceptionHandler(HttpMessageNotReadableException.class)
     public ResponseEntity<ErroResposta> corpoIlegivel(HttpMessageNotReadableException ex) {
         log.debug("Corpo da requisição ilegível", ex);
+        // valor do tipo errado num campo (ex.: 2.5 onde se espera inteiro): aponta o campo
+        if (ex.getCause() instanceof MismatchedInputException erro && !erro.getPath().isEmpty()) {
+            String campo = erro.getPath().getLast().getPropertyName();
+            boolean inteiro = erro.getTargetType() == Integer.class || erro.getTargetType() == int.class
+                    || erro.getTargetType() == Long.class || erro.getTargetType() == long.class;
+            String mensagem = inteiro ? "Informe um número inteiro." : "Valor em formato inválido.";
+            return responder(HttpStatus.BAD_REQUEST, "Um ou mais campos são inválidos.", List.of(new ErroCampo(campo, mensagem)));
+        }
         return responder(HttpStatus.BAD_REQUEST, "Corpo da requisição inválido ou malformado.");
     }
 

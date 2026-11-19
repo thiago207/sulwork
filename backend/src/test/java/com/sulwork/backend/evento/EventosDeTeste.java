@@ -20,7 +20,8 @@ public final class EventosDeTeste {
             case CANCELADO -> new StatusEvento[] {StatusEvento.CANCELADO};
         };
         for (var passo : caminho) {
-            evento.mudarStatus(passo, AGORA);
+            // realizado só vale depois da data do evento
+            evento.mudarStatus(passo, passo == StatusEvento.REALIZADO ? AGORA.plusDays(11) : AGORA);
         }
         return evento;
     }

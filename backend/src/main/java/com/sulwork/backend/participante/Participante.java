@@ -54,4 +54,10 @@ public class Participante {
     public void desativar() {
         this.ativo = false;
     }
+
+    // quem foi excluído e se cadastra de novo volta com os dados novos
+    public void reativar(String nome, Set<RestricaoAlimentar> restricoes, String observacaoRestricao) {
+        atualizar(nome, cpf, restricoes, observacaoRestricao);
+        this.ativo = true;
+    }
 }

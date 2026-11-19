@@ -1,6 +1,8 @@
 package com.sulwork.backend.evento;
 
 import com.sulwork.backend.comum.erro.NaoEncontradoException;
+import com.sulwork.backend.comum.erro.RegraNegocioException;
+import com.sulwork.backend.item.ItemRepository;
 import com.sulwork.backend.evento.dto.EventoRequisicao;
 import com.sulwork.backend.evento.dto.EventoResposta;
 import java.time.Clock;
@@ -15,6 +17,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class EventoService {
 
     private final EventoRepository repository;
+    private final ItemRepository itemRepository;
     private final Clock relogio;
 
     @Transactional
@@ -53,6 +56,10 @@ public class EventoService {
     @Transactional
     public EventoResposta mudarStatus(Long id, StatusEvento destino) {
         var evento = buscarEntidade(id);
+        if (evento.getStatus() == StatusEvento.RASCUNHO && destino == StatusEvento.ABERTO
+                && !itemRepository.existsByCategoriaEventoId(id)) {
+            throw new RegraNegocioException("Cadastre pelo menos um item antes de abrir o evento.");
+        }
         evento.mudarStatus(destino, agora());
         return EventoMapper.paraResposta(evento);
     }

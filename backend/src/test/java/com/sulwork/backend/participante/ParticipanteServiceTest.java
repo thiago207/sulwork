@@ -9,7 +9,11 @@ import static org.mockito.Mockito.when;
 
 import com.sulwork.backend.comum.erro.ConflitoException;
 import com.sulwork.backend.comum.erro.NaoEncontradoException;
+import com.sulwork.backend.comum.erro.RegraNegocioException;
+import com.sulwork.backend.participacao.ParticipacaoRepository;
+import com.sulwork.backend.participante.dto.ParticipanteEdicaoRequisicao;
 import com.sulwork.backend.participante.dto.ParticipanteRequisicao;
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import org.junit.jupiter.api.BeforeEach;
@@ -24,12 +28,14 @@ class ParticipanteServiceTest {
 
     @Mock
     ParticipanteRepository repository;
+    @Mock
+    ParticipacaoRepository participacaoRepository;
 
     ParticipanteService service;
 
     @BeforeEach
     void configurar() {
-        service = new ParticipanteService(repository);
+        service = new ParticipanteService(repository, participacaoRepository);
     }
 
     static Participante participante(long id, String cpf) {
@@ -46,7 +52,7 @@ class ParticipanteServiceTest {
 
         var resposta = service.criar(req);
 
-        assertThat(resposta.cpf()).isEqualTo("52998224725");
+        assertThat(resposta.cpf()).isEqualTo("***.982.247-**");
         assertThat(resposta.restricoes()).containsExactly(RestricaoAlimentar.SEM_GLUTEN);
         assertThat(resposta.observacaoRestricao()).isEqualTo("celíaca");
     }
@@ -72,14 +78,18 @@ class ParticipanteServiceTest {
     }
 
     @Test
-    void criarComCpfDeParticipanteInativoTambemRetornaConflito() {
+    void criarComCpfDeParticipanteExcluidoReativaComOsDadosNovos() {
         var inativo = participante(1, "52998224725");
         inativo.desativar();
         when(repository.findByCpf("52998224725")).thenReturn(Optional.of(inativo));
 
-        assertThatThrownBy(() -> service.criar(new ParticipanteRequisicao("Bia", "529.982.247-25", null, null)))
-                .isInstanceOf(ConflitoException.class)
-                .hasMessage("Já existe um participante inativo com este CPF.");
+        var resposta = service.criar(new ParticipanteRequisicao("Bia", "529.982.247-25", Set.of(RestricaoAlimentar.SEM_MEL), null));
+
+        assertThat(inativo.isAtivo()).isTrue();
+        assertThat(resposta.id()).isEqualTo(1L);
+        assertThat(resposta.nome()).isEqualTo("Bia");
+        assertThat(resposta.restricoes()).containsExactly(RestricaoAlimentar.SEM_MEL);
+        verify(repository, never()).save(any());
     }
 
     @Test
@@ -88,7 +98,7 @@ class ParticipanteServiceTest {
         when(repository.findByIdAndAtivoTrue(1L)).thenReturn(Optional.of(ana));
         when(repository.findByCpf("52998224725")).thenReturn(Optional.of(ana));
 
-        var resposta = service.editar(1L, new ParticipanteRequisicao("Ana Maria", "52998224725", Set.of(), null));
+        var resposta = service.editar(1L, new ParticipanteEdicaoRequisicao("Ana Maria", "52998224725", Set.of(), null));
 
         assertThat(resposta.nome()).isEqualTo("Ana Maria");
         assertThat(resposta.restricoes()).isEmpty();
@@ -99,7 +109,7 @@ class ParticipanteServiceTest {
         when(repository.findByIdAndAtivoTrue(1L)).thenReturn(Optional.of(participante(1, "52998224725")));
         when(repository.findByCpf("11144477735")).thenReturn(Optional.of(participante(2, "11144477735")));
 
-        assertThatThrownBy(() -> service.editar(1L, new ParticipanteRequisicao("Ana", "11144477735", null, null)))
+        assertThatThrownBy(() -> service.editar(1L, new ParticipanteEdicaoRequisicao("Ana", "11144477735", null, null)))
                 .isInstanceOf(ConflitoException.class);
     }
 
@@ -112,6 +122,31 @@ class ParticipanteServiceTest {
 
         assertThat(ana.isAtivo()).isFalse();
         verify(repository, never()).delete(any());
+    }
+
+    @Test
+    void editarSemCpfMantemOAtual() {
+        var ana = participante(1, "52998224725");
+        when(repository.findByIdAndAtivoTrue(1L)).thenReturn(Optional.of(ana));
+        when(repository.findByCpf("52998224725")).thenReturn(Optional.of(ana));
+
+        service.editar(1L, new ParticipanteEdicaoRequisicao("Ana Paula", null, null, null));
+
+        assertThat(ana.getCpf()).isEqualTo("52998224725");
+        assertThat(ana.getNome()).isEqualTo("Ana Paula");
+    }
+
+    @Test
+    void excluirQuemEstaEmEventoEmAndamentoEhBloqueado() {
+        var ana = participante(1, "52998224725");
+        when(repository.findByIdAndAtivoTrue(1L)).thenReturn(Optional.of(ana));
+        when(participacaoRepository.findNomesDosEventos(any(), any())).thenReturn(List.of("Café de fim de ano"));
+
+        assertThatThrownBy(() -> service.excluir(1L))
+                .isInstanceOf(RegraNegocioException.class)
+                .hasMessage("O participante está no evento \"Café de fim de ano\", que ainda não terminou. "
+                        + "Tire-o do evento antes de excluir.");
+        assertThat(ana.isAtivo()).isTrue();
     }
 
     @Test

@@ -77,8 +77,6 @@ class CoberturaIntegracaoTest {
         evento = id(enviar(post("/api/eventos"), """
                 {"nome": "Café da manhã", "tipo": "CAFE_DA_MANHA", "dataHora": "%s", "prazoAlteracoes": "%s"}
                 """.formatted(agora.plusDays(10), agora.plusDays(8))));
-        enviar(patch("/api/eventos/{id}/status", evento), "{\"status\": \"ABERTO\"}").andExpect(status().isOk());
-
         long padaria = categoria("Padaria", 25, "UNIDADE");
         long bebidas = categoria("Bebidas", 6, "LITRO");
         categoria("Talheres", 10, "UNIDADE");
@@ -87,6 +85,7 @@ class CoberturaIntegracaoTest {
         long bolo = item(padaria, "Bolo", 2, false, "\"GLUTEN\", \"LACTOSE\", \"OVO\"");
         long cafe = item(bebidas, "Café", 3, true, "");
         long suco = item(bebidas, "Suco", 4, false, "");
+        enviar(patch("/api/eventos/{id}/status", evento), "{\"status\": \"ABERTO\"}").andExpect(status().isOk());
 
         long ana = participante("VEGANO");
         long bruno = participante("SEM_LACTOSE");

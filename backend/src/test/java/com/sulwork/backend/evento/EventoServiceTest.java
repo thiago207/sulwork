@@ -11,6 +11,7 @@ import com.sulwork.backend.comum.config.RelogioConfig;
 import com.sulwork.backend.comum.erro.NaoEncontradoException;
 import com.sulwork.backend.comum.erro.RegraNegocioException;
 import com.sulwork.backend.evento.dto.EventoRequisicao;
+import com.sulwork.backend.item.ItemRepository;
 import java.time.Clock;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -28,13 +29,15 @@ class EventoServiceTest {
 
     @Mock
     EventoRepository repository;
+    @Mock
+    ItemRepository itemRepository;
 
     EventoService service;
 
     @BeforeEach
     void configurar() {
         var relogioFixo = Clock.fixed(AGORA.atZone(RelogioConfig.FUSO).toInstant(), RelogioConfig.FUSO);
-        service = new EventoService(repository, relogioFixo);
+        service = new EventoService(repository, itemRepository, relogioFixo);
     }
 
     static Evento eventoEmRascunho() {
@@ -109,11 +112,24 @@ class EventoServiceTest {
     void mudarStatusAlteraAEntidadeSemChamarSave() {
         var evento = eventoEmRascunho();
         when(repository.findById(1L)).thenReturn(Optional.of(evento));
+        when(itemRepository.existsByCategoriaEventoId(1L)).thenReturn(true);
 
         var resposta = service.mudarStatus(1L, StatusEvento.ABERTO);
 
         assertThat(resposta.status()).isEqualTo(StatusEvento.ABERTO);
         verify(repository, never()).save(any());
+    }
+
+    @Test
+    void abrirEventoSemItensEhBloqueado() {
+        var evento = eventoEmRascunho();
+        when(repository.findById(1L)).thenReturn(Optional.of(evento));
+        when(itemRepository.existsByCategoriaEventoId(1L)).thenReturn(false);
+
+        assertThatThrownBy(() -> service.mudarStatus(1L, StatusEvento.ABERTO))
+                .isInstanceOf(RegraNegocioException.class)
+                .hasMessage("Cadastre pelo menos um item antes de abrir o evento.");
+        assertThat(evento.getStatus()).isEqualTo(StatusEvento.RASCUNHO);
     }
 
     @Test

@@ -55,6 +55,11 @@ class ContribuicaoIntegracaoTest {
         long evento = id(enviar(post("/api/eventos"), """
                 {"nome": "Café", "tipo": "CAFE_DA_MANHA", "dataHora": "%s", "prazoAlteracoes": "%s"}
                 """.formatted(agora.plusDays(10), agora.plusDays(8))).andExpect(status().isCreated()));
+        // o evento só abre com pelo menos um item
+        long apoio = id(enviar(post("/api/eventos/{id}/categorias", evento),
+                "{\"nome\": \"Apoio\", \"meta\": 1, \"unidade\": \"UNIDADE\"}"));
+        enviar(post("/api/eventos/{id}/itens", evento),
+                "{\"nome\": \"Guardanapo\", \"categoriaId\": %d, \"quantidadeNecessaria\": 1}".formatted(apoio));
         enviar(patch("/api/eventos/{id}/status", evento), "{\"status\": \"ABERTO\"}").andExpect(status().isOk());
         return evento;
     }
@@ -170,7 +175,7 @@ class ContribuicaoIntegracaoTest {
 
         contribuir(evento, ana, item, 1)
                 .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.avisos[0]").value("O item Leite contém LACTOSE, que conflita com sua restrição SEM_LACTOSE."));
+                .andExpect(jsonPath("$.avisos[0]").value("O item Leite contém lactose, que conflita com sua restrição: sem lactose."));
 
         mockMvc.perform(get("/api/participantes/{id}/contribuicoes", ana))
                 .andExpect(jsonPath("$", hasSize(1)))

@@ -3,6 +3,7 @@ package com.sulwork.backend.evento;
 import static com.sulwork.backend.evento.StatusEvento.ABERTO;
 import static com.sulwork.backend.evento.StatusEvento.ENCERRADO;
 import static com.sulwork.backend.evento.StatusEvento.RASCUNHO;
+import static com.sulwork.backend.evento.StatusEvento.REALIZADO;
 
 import com.sulwork.backend.comum.erro.RegraNegocioException;
 import jakarta.persistence.Entity;
@@ -74,6 +75,9 @@ public class Evento {
         }
         if (status == ENCERRADO && destino == ABERTO && !agora.isBefore(prazoAlteracoes)) {
             throw new RegraNegocioException("Não é possível reabrir o evento: o prazo de alterações já venceu.");
+        }
+        if (destino == REALIZADO && agora.isBefore(dataHora)) {
+            throw new RegraNegocioException("O evento só pode ser marcado como realizado depois da data dele.");
         }
         this.status = destino;
     }

@@ -38,7 +38,7 @@ class ContribuicaoTest {
                 Set.of(Alergeno.GLUTEN, Alergeno.OVO, Alergeno.LACTOSE, Alergeno.AMENDOIM));
 
         assertThat(c.avisosDeAlergeno()).containsExactly(
-                "O item Torta contém LACTOSE, OVO, que conflita com sua restrição VEGANO.",
-                "O item Torta contém GLUTEN, que conflita com sua restrição SEM_GLUTEN.");
+                "O item Torta contém lactose, ovo, que conflita com sua restrição: vegano.",
+                "O item Torta contém glúten, que conflita com sua restrição: sem glúten.");
     }
 }

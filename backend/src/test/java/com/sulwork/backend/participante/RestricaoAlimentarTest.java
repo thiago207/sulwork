@@ -28,7 +28,9 @@ class RestricaoAlimentarTest {
             RestricaoAlimentar.SEM_LACTOSE, Set.of(LACTOSE),
             RestricaoAlimentar.ALERGIA_AMENDOIM, Set.of(AMENDOIM),
             RestricaoAlimentar.ALERGIA_FRUTOS_DO_MAR, Set.of(FRUTOS_DO_MAR),
-            RestricaoAlimentar.ALERGIA_OVO, Set.of(OVO));
+            RestricaoAlimentar.ALERGIA_OVO, Set.of(OVO),
+            RestricaoAlimentar.ALERGIA_PEIXE, Set.of(PEIXE),
+            RestricaoAlimentar.SEM_MEL, Set.of(MEL));
 
     @ParameterizedTest
     @EnumSource(RestricaoAlimentar.class)

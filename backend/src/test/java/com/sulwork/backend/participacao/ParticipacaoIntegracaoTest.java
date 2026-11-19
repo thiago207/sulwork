@@ -49,6 +49,11 @@ class ParticipacaoIntegracaoTest {
                 {"nome": "Café", "tipo": "CAFE_DA_MANHA", "dataHora": "%s", "prazoAlteracoes": "%s"}
                 """.formatted(agora.plusDays(10), agora.plusDays(8))).andExpect(status().isCreated()));
         if (abrir) {
+            // o evento só abre com pelo menos um item
+            long categoria = id(postJson("/api/eventos/" + id + "/categorias",
+                    "{\"nome\": \"Apoio\", \"meta\": 1, \"unidade\": \"UNIDADE\"}"));
+            postJson("/api/eventos/" + id + "/itens",
+                    "{\"nome\": \"Guardanapo\", \"categoriaId\": %d, \"quantidadeNecessaria\": 1}".formatted(categoria));
             mockMvc.perform(patch("/api/eventos/{id}/status", id)
                     .contentType(MediaType.APPLICATION_JSON).content("{\"status\": \"ABERTO\"}"))
                     .andExpect(status().isOk());
@@ -103,13 +108,39 @@ class ParticipacaoIntegracaoTest {
     }
 
     @Test
+    void excluidoQueSeCadastraDeNovoEhReativado() throws Exception {
+        String cpf = CpfsDeTeste.aleatorio();
+        long id = criarParticipante(cpf);
+        mockMvc.perform(delete("/api/participantes/{id}", id)).andExpect(status().isNoContent());
+
+        postJson("/api/participantes", "{\"nome\": \"Ana Volta\", \"cpf\": \"" + cpf + "\"}")
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.id").value((int) id))
+                .andExpect(jsonPath("$.nome").value("Ana Volta"));
+    }
+
+    @Test
+    void excluirQuemEstaEmEventoAbertoRetorna422AteSairDoEvento() throws Exception {
+        long evento = criarEvento(true);
+        long participante = criarParticipante(CpfsDeTeste.aleatorio());
+        postJson("/api/eventos/" + evento + "/participantes/" + participante, "").andExpect(status().isCreated());
+
+        mockMvc.perform(delete("/api/participantes/{id}", participante))
+                .andExpect(status().isUnprocessableContent());
+
+        // depois de sair do evento, a exclusão passa
+        mockMvc.perform(delete("/api/eventos/{e}/participantes/{p}", evento, participante)).andExpect(status().isNoContent());
+        mockMvc.perform(delete("/api/participantes/{id}", participante)).andExpect(status().isNoContent());
+    }
+
+    @Test
     void cpfComMascaraEhSalvoSoComNumerosEDuplicadoRetorna409() throws Exception {
         String cpf = CpfsDeTeste.aleatorio();
         String mascarado = cpf.replaceFirst("(\\d{3})(\\d{3})(\\d{3})(\\d{2})", "$1.$2.$3-$4");
 
         postJson("/api/participantes", "{\"nome\": \"Bia\", \"cpf\": \"" + mascarado + "\"}")
                 .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.cpf").value(cpf));
+                .andExpect(jsonPath("$.cpf").value("***." + cpf.substring(3, 6) + "." + cpf.substring(6, 9) + "-**"));
         postJson("/api/participantes", "{\"nome\": \"Outra\", \"cpf\": \"" + cpf + "\"}")
                 .andExpect(status().isConflict());
     }

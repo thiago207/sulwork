@@ -25,4 +25,6 @@ public interface ItemRepository extends JpaRepository<Item, Long> {
     Optional<Item> findByIdAndEventoComLock(Long id, Long eventoId);
 
     boolean existsByCategoriaId(Long categoriaId);
+
+    boolean existsByCategoriaEventoId(Long eventoId);
 }

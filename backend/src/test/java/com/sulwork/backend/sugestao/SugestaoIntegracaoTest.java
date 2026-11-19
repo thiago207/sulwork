@@ -75,7 +75,6 @@ class SugestaoIntegracaoTest {
         evento = id(enviar(post("/api/eventos"), """
                 {"nome": "Café", "tipo": "CAFE_DA_MANHA", "dataHora": "%s", "prazoAlteracoes": "%s"}
                 """.formatted(agora.plusDays(10), agora.plusDays(8))));
-        enviar(patch("/api/eventos/{id}/status", evento), "{\"status\": \"ABERTO\"}").andExpect(status().isOk());
         long categoria = id(enviar(post("/api/eventos/{id}/categorias", evento),
                 "{\"nome\": \"Mesa\", \"meta\": 50, \"unidade\": \"UNIDADE\"}"));
 
@@ -85,6 +84,7 @@ class SugestaoIntegracaoTest {
         item(categoria, "Bolo", 4, false, "\"GLUTEN\", \"LACTOSE\", \"OVO\"");
         item(categoria, "Mel", 2, false, "\"MEL\"");
         long suco = item(categoria, "Suco", 4, false, "");
+        enviar(patch("/api/eventos/{id}/status", evento), "{\"status\": \"ABERTO\"}").andExpect(status().isOk());
 
         ana = participante("\"VEGANO\"");
         long bruno = participante("\"SEM_LACTOSE\"");

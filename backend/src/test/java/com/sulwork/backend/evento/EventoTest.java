@@ -26,6 +26,12 @@ class EventoTest {
     static final LocalDateTime DATA = AGORA.plusDays(10);
     static final LocalDateTime PRAZO = AGORA.plusDays(8);
     static final LocalDateTime DEPOIS_DO_PRAZO = PRAZO.plusHours(1);
+    static final LocalDateTime DEPOIS_DO_EVENTO = DATA.plusHours(1);
+
+    // realizado só depois da data do evento; as outras transições usam AGORA
+    static LocalDateTime momentoPara(StatusEvento destino) {
+        return destino == REALIZADO ? DEPOIS_DO_EVENTO : AGORA;
+    }
 
     // escrita a partir da regra 1, sem reaproveitar o Map do enum
     static final Set<String> TRANSICOES_VALIDAS = Set.of(
@@ -47,7 +53,7 @@ class EventoTest {
             case CANCELADO -> new StatusEvento[] {CANCELADO};
         };
         for (var passo : caminho) {
-            evento.mudarStatus(passo, AGORA);
+            evento.mudarStatus(passo, momentoPara(passo));
         }
         return evento;
     }
@@ -70,7 +76,7 @@ class EventoTest {
             var evento = eventoNoStatus(origem);
 
             if (valida) {
-                evento.mudarStatus(destino, AGORA);
+                evento.mudarStatus(destino, momentoPara(destino));
                 assertThat(evento.getStatus()).isEqualTo(destino);
             } else {
                 assertThatThrownBy(() -> evento.mudarStatus(destino, AGORA))
@@ -78,6 +84,16 @@ class EventoTest {
                         .hasMessage("Não é permitido mudar o status de " + origem + " para " + destino + ".");
                 assertThat(evento.getStatus()).isEqualTo(origem);
             }
+        }
+
+        @Test
+        void realizadoAntesDaDataDoEventoEhBloqueado() {
+            var evento = eventoNoStatus(ENCERRADO);
+
+            assertThatThrownBy(() -> evento.mudarStatus(REALIZADO, DATA.minusMinutes(1)))
+                    .isInstanceOf(RegraNegocioException.class)
+                    .hasMessage("O evento só pode ser marcado como realizado depois da data dele.");
+            assertThat(evento.getStatus()).isEqualTo(ENCERRADO);
         }
 
         @Test
@@ -112,7 +128,7 @@ class EventoTest {
         void prazoVencidoNaoImpedeEncerrarRealizarOuCancelar() {
             var aberto = eventoNoStatus(ABERTO);
             aberto.mudarStatus(ENCERRADO, DEPOIS_DO_PRAZO);
-            aberto.mudarStatus(REALIZADO, DEPOIS_DO_PRAZO);
+            aberto.mudarStatus(REALIZADO, DEPOIS_DO_EVENTO);
             assertThat(aberto.getStatus()).isEqualTo(REALIZADO);
 
             var encerrado = eventoNoStatus(ENCERRADO);

@@ -65,6 +65,39 @@ class CategoriaItemIntegracaoTest {
     }
 
     @Test
+    void categoriaComMesmoNomeIgnorandoCaixaEAcentoRetorna409() throws Exception {
+        long evento = criarEvento();
+        criarCategoria(evento);
+
+        enviar(post("/api/eventos/{id}/categorias", evento), "{\"nome\": \" bébidas \", \"meta\": 5, \"unidade\": \"LITRO\"}")
+                .andExpect(status().isConflict())
+                .andExpect(jsonPath("$.mensagem").value("Já existe uma categoria com este nome no evento."));
+    }
+
+    @Test
+    void quantidadeComDecimalRetorna400EmVezDeCortar() throws Exception {
+        long evento = criarEvento();
+        long categoria = criarCategoria(evento);
+
+        enviar(post("/api/eventos/{id}/itens", evento),
+                "{\"nome\": \"Suco\", \"categoriaId\": %d, \"quantidadeNecessaria\": 2.5}".formatted(categoria))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.campos[0].campo").value("quantidadeNecessaria"))
+                .andExpect(jsonPath("$.campos[0].mensagem").value("Informe um número inteiro."));
+        mockMvc.perform(get("/api/eventos/{id}/itens", evento)).andExpect(jsonPath("$", hasSize(0)));
+    }
+
+    @Test
+    void abrirEventoSemItensRetorna422() throws Exception {
+        long evento = criarEvento();
+        criarCategoria(evento);
+
+        enviar(patch("/api/eventos/{id}/status", evento), "{\"status\": \"ABERTO\"}")
+                .andExpect(status().isUnprocessableContent())
+                .andExpect(jsonPath("$.mensagem").value("Cadastre pelo menos um item antes de abrir o evento."));
+    }
+
+    @Test
     void itemHerdaUnidadeEEdicaoEhBloqueadaDepoisDeEncerrar() throws Exception {
         long evento = criarEvento();
         long categoria = criarCategoria(evento);

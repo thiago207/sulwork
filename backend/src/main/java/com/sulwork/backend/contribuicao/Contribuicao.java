@@ -56,9 +56,10 @@ public class Contribuicao {
                     String alergenos = item.getAlergenos().stream()
                             .filter(restricao.getAlergenos()::contains)
                             .sorted()
-                            .map(Alergeno::name)
+                            .map(Alergeno::getRotulo)
                             .collect(Collectors.joining(", "));
-                    return "O item " + item.getNome() + " contém " + alergenos + ", que conflita com sua restrição " + restricao + ".";
+                    return "O item " + item.getNome() + " contém " + alergenos
+                            + ", que conflita com sua restrição: " + restricao.getRotulo() + ".";
                 })
                 .toList();
     }

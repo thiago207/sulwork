@@ -165,7 +165,7 @@ class ContribuicaoServiceTest {
         var resposta = serviceEm(AGORA).criar(1L, REQ);
 
         assertThat(resposta.avisos()).containsExactly(
-                "O item Vitamina contém LACTOSE, que conflita com sua restrição SEM_LACTOSE.");
+                "O item Vitamina contém lactose, que conflita com sua restrição: sem lactose.");
         verify(repository).save(any(Contribuicao.class));
     }
 

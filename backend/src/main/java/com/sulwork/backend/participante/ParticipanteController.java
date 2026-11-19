@@ -1,5 +1,6 @@
 package com.sulwork.backend.participante;
 
+import com.sulwork.backend.participante.dto.ParticipanteEdicaoRequisicao;
 import com.sulwork.backend.participante.dto.ParticipanteRequisicao;
 import com.sulwork.backend.participante.dto.ParticipanteResposta;
 import io.swagger.v3.oas.annotations.Operation;
@@ -60,7 +61,7 @@ public class ParticipanteController {
     @ApiResponse(responseCode = "404", description = "Participante não encontrado ou inativo")
     @ApiResponse(responseCode = "409", description = "CPF já usado por outro participante")
     @PutMapping("/{id}")
-    public ParticipanteResposta editar(@PathVariable Long id, @Valid @RequestBody ParticipanteRequisicao req) {
+    public ParticipanteResposta editar(@PathVariable Long id, @Valid @RequestBody ParticipanteEdicaoRequisicao req) {
         return service.editar(id, req);
     }
 

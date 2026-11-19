@@ -17,18 +17,26 @@ import java.util.Set;
 
 // regra 11: cada restrição declara os alérgenos com que conflita
 public enum RestricaoAlimentar {
-    VEGANO(LACTOSE, OVO, CARNE, PEIXE, FRUTOS_DO_MAR, MEL),
-    VEGETARIANO(CARNE, PEIXE, FRUTOS_DO_MAR),
-    SEM_GLUTEN(GLUTEN),
-    SEM_LACTOSE(LACTOSE),
-    ALERGIA_AMENDOIM(AMENDOIM),
-    ALERGIA_FRUTOS_DO_MAR(FRUTOS_DO_MAR),
-    ALERGIA_OVO(OVO);
+    VEGANO("vegano", LACTOSE, OVO, CARNE, PEIXE, FRUTOS_DO_MAR, MEL),
+    VEGETARIANO("vegetariano", CARNE, PEIXE, FRUTOS_DO_MAR),
+    SEM_GLUTEN("sem glúten", GLUTEN),
+    SEM_LACTOSE("sem lactose", LACTOSE),
+    SEM_MEL("sem mel", MEL),
+    ALERGIA_AMENDOIM("alergia a amendoim", AMENDOIM),
+    ALERGIA_FRUTOS_DO_MAR("alergia a frutos do mar", FRUTOS_DO_MAR),
+    ALERGIA_OVO("alergia a ovo", OVO),
+    ALERGIA_PEIXE("alergia a peixe", PEIXE);
 
+    private final String rotulo;
     private final Set<Alergeno> alergenos;
 
-    RestricaoAlimentar(Alergeno primeiro, Alergeno... outros) {
+    RestricaoAlimentar(String rotulo, Alergeno primeiro, Alergeno... outros) {
+        this.rotulo = rotulo;
         this.alergenos = Collections.unmodifiableSet(EnumSet.of(primeiro, outros));
+    }
+
+    public String getRotulo() {
+        return rotulo;
     }
 
     public Set<Alergeno> getAlergenos() {

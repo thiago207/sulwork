@@ -59,6 +59,19 @@ class EventoIntegracaoTest {
         return ((Number) JsonPath.read(resposta, "$.id")).longValue();
     }
 
+    // o evento só abre com pelo menos um item
+    private void adicionarItem(long id) throws Exception {
+        String categoria = mockMvc.perform(post("/api/eventos/{id}/categorias", id)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"nome\": \"Mesa\", \"meta\": 1, \"unidade\": \"UNIDADE\"}"))
+                .andReturn().getResponse().getContentAsString();
+        mockMvc.perform(post("/api/eventos/{id}/itens", id)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"nome\": \"Pão\", \"categoriaId\": %s, \"quantidadeNecessaria\": 1}"
+                                .formatted(JsonPath.read(categoria, "$.id").toString())))
+                .andExpect(status().isCreated());
+    }
+
     private void mudarStatus(long id, StatusEvento destino) throws Exception {
         mockMvc.perform(patch("/api/eventos/{id}/status", id)
                         .contentType(MediaType.APPLICATION_JSON)
@@ -81,6 +94,7 @@ class EventoIntegracaoTest {
         long id = ((Number) JsonPath.read(resposta, "$.id")).longValue();
 
         // abrir, encerrar e reabrir
+        adicionarItem(id);
         mudarStatus(id, StatusEvento.ABERTO);
         mudarStatus(id, StatusEvento.ENCERRADO);
         mudarStatus(id, StatusEvento.ABERTO);
@@ -130,6 +144,7 @@ class EventoIntegracaoTest {
     @Test
     void excluirSoEmRascunho() throws Exception {
         long aberto = criarEvento("Aberto");
+        adicionarItem(aberto);
         mudarStatus(aberto, StatusEvento.ABERTO);
         mockMvc.perform(delete("/api/eventos/{id}", aberto))
                 .andExpect(status().isUnprocessableContent());
