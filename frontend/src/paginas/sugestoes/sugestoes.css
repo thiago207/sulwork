@@ -1,0 +1,74 @@
+.escolha-pessoa {
+  max-width: 28rem;
+}
+
+.nota-ocultos {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.875rem;
+  color: var(--cor-texto-suave);
+}
+
+.sugestao.obrigatoria {
+  border-top: 3px solid var(--cor-marca);
+}
+
+.sugestao-categoria {
+  font-size: 0.7rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--cor-texto-suave);
+}
+
+.sugestao-nome {
+  margin: 0.2rem 0 0.75rem;
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+
+.sugestao-faltante {
+  margin-bottom: 0.5rem;
+  font-size: 0.9rem;
+  color: var(--cor-texto-medio);
+}
+
+.sugestao-faltante strong {
+  font-size: 1.2rem;
+  color: var(--cor-texto);
+}
+
+.sugestao-sua {
+  margin: 0.6rem 0 0;
+  font-size: 0.8125rem;
+  color: var(--cor-texto-suave);
+}
+
+.sugestao-sua:empty {
+  display: none;
+}
+
+.levar {
+  padding: 0.75rem 1rem;
+}
+
+.levar .form-control {
+  max-width: 5rem;
+}
+
+.conflito {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 0.85rem;
+  padding: 0.6rem 0.75rem;
+  font-size: 0.8125rem;
+  border-radius: var(--raio-pequeno);
+  background: #fff7e0;
+  color: #92400e;
+}
+
+.conflito.com-voce {
+  background: #fee2e2;
+  color: #991b1b;
+}

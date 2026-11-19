@@ -1,0 +1,150 @@
+/* cores da marca e ajustes no Bootstrap pelas variáveis CSS dele */
+:root {
+  --cor-marca: #e8590c;
+  --cor-marca-escura: #c2410c;
+  --cor-marca-clara: #fdba74;
+  --cor-marca-suave: #fff4ec;
+  --cor-fundo: #f7f5f2;
+  --cor-superficie: #ffffff;
+  --cor-superficie-2: #fbfaf8;
+  --cor-neutra: #f1ece6;
+  --cor-texto: #1f2328;
+  --cor-texto-medio: #4b5563;
+  --cor-texto-suave: #6b7280;
+  --cor-borda: #e9e4dd;
+  --cor-borda-forte: #d9d2c8;
+  --raio: 0.875rem;
+  --raio-pequeno: 0.5rem;
+  --sombra: 0 1px 2px rgb(31 35 40 / 4%), 0 4px 14px rgb(31 35 40 / 5%);
+  --sombra-elevada: 0 2px 4px rgb(31 35 40 / 5%), 0 14px 30px rgb(31 35 40 / 10%);
+
+  --bs-body-font-family: 'Inter Variable', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --bs-body-color: var(--cor-texto);
+  --bs-secondary-color: var(--cor-texto-suave);
+  --bs-border-color: var(--cor-borda);
+  --bs-link-color: var(--cor-marca-escura);
+  --bs-link-color-rgb: 194, 65, 12;
+  --bs-link-hover-color: #9a3412;
+  --bs-link-hover-color-rgb: 154, 52, 18;
+  --bs-focus-ring-color: rgb(232 89 12 / 22%);
+}
+
+/* o --bs-body-bg continua branco porque cards e campos usam ele; só o fundo da página é bege */
+body {
+  background-color: var(--cor-fundo);
+  -webkit-font-smoothing: antialiased;
+}
+
+h1, h2, h3 {
+  letter-spacing: -0.015em;
+}
+
+.btn {
+  --bs-btn-font-weight: 500;
+  --bs-btn-border-radius: var(--raio-pequeno);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+}
+
+.btn-primary {
+  --bs-btn-bg: var(--cor-marca);
+  --bs-btn-border-color: var(--cor-marca);
+  --bs-btn-hover-bg: var(--cor-marca-escura);
+  --bs-btn-hover-border-color: var(--cor-marca-escura);
+  --bs-btn-active-bg: var(--cor-marca-escura);
+  --bs-btn-active-border-color: var(--cor-marca-escura);
+  --bs-btn-disabled-bg: var(--cor-marca);
+  --bs-btn-disabled-border-color: var(--cor-marca);
+  --bs-btn-focus-shadow-rgb: 232, 89, 12;
+}
+
+.btn-outline-primary {
+  --bs-btn-color: var(--cor-marca-escura);
+  --bs-btn-border-color: var(--cor-marca-clara);
+  --bs-btn-hover-color: #fff;
+  --bs-btn-hover-bg: var(--cor-marca);
+  --bs-btn-hover-border-color: var(--cor-marca);
+  --bs-btn-active-color: #fff;
+  --bs-btn-active-bg: var(--cor-marca-escura);
+  --bs-btn-active-border-color: var(--cor-marca-escura);
+  --bs-btn-focus-shadow-rgb: 232, 89, 12;
+}
+
+.btn-light {
+  --bs-btn-bg: var(--cor-superficie);
+  --bs-btn-border-color: var(--cor-borda-forte);
+  --bs-btn-hover-bg: var(--cor-neutra);
+  --bs-btn-hover-border-color: var(--cor-borda-forte);
+  --bs-btn-active-bg: var(--cor-neutra);
+  --bs-btn-active-border-color: var(--cor-borda-forte);
+}
+
+.form-control,
+.form-select {
+  border-color: var(--cor-borda-forte);
+  border-radius: var(--raio-pequeno);
+}
+
+.form-control:focus,
+.form-select:focus,
+.form-check-input:focus {
+  border-color: var(--cor-marca-clara);
+  box-shadow: 0 0 0 0.25rem var(--bs-focus-ring-color);
+}
+
+.form-control::placeholder {
+  color: #a8a29e;
+}
+
+.form-check-input:checked {
+  background-color: var(--cor-marca);
+  border-color: var(--cor-marca);
+}
+
+.form-label {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--cor-texto-medio);
+}
+
+.card {
+  --bs-card-border-color: var(--cor-borda);
+  --bs-card-border-radius: var(--raio);
+  --bs-card-inner-border-radius: calc(var(--raio) - 1px);
+  --bs-card-cap-bg: var(--cor-superficie-2);
+  box-shadow: var(--sombra);
+}
+
+/* sem isso o cabeçalho da tabela passa por cima do canto arredondado do card */
+.card > .table-responsive {
+  border-radius: var(--bs-card-inner-border-radius);
+}
+
+.list-group {
+  --bs-list-group-border-color: var(--cor-borda);
+}
+
+.table {
+  --bs-table-bg: transparent;
+  --bs-table-border-color: var(--cor-borda);
+  margin-bottom: 0;
+}
+
+.table > :not(caption) > * > * {
+  padding: 0.75rem 1rem;
+}
+
+.table > thead th {
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--cor-texto-suave);
+  background: var(--cor-superficie-2);
+}
+
+.table > tbody > tr:last-child > * {
+  border-bottom: 0;
+}

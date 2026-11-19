@@ -1,0 +1,328 @@
+/* cabeçalho do evento */
+.cabecalho-evento .card-body {
+  padding: 1.5rem;
+}
+
+.cabecalho-evento-nome {
+  margin: 0 0 0.35rem;
+  font-size: 1.75rem;
+  font-weight: 700;
+  overflow-wrap: anywhere;
+}
+
+.cabecalho-evento-descricao {
+  max-width: 62ch;
+  margin: 0 0 0.75rem;
+  color: var(--cor-texto-medio);
+}
+
+.cabecalho-evento-descricao:empty {
+  display: none;
+}
+
+.tipo-evento {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: var(--cor-texto-suave);
+}
+
+.metas {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem 1.25rem;
+  font-size: 0.875rem;
+  color: var(--cor-texto-suave);
+}
+
+.metas .bi {
+  margin-right: 0.4rem;
+  color: var(--cor-marca);
+}
+
+.acoes-evento {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: 0.5rem;
+}
+
+.resumo {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(11rem, 1fr));
+  gap: 0.75rem;
+  margin-top: 1.25rem;
+}
+
+.resumo-item {
+  padding: 0.85rem 1rem;
+  background: var(--cor-superficie-2);
+  border: 1px solid var(--cor-borda);
+  border-radius: var(--raio-pequeno);
+}
+
+.resumo-rotulo {
+  font-size: 0.7rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--cor-texto-suave);
+}
+
+.resumo-valor {
+  font-size: 1.35rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.ajuda {
+  margin-left: 0.2rem;
+  cursor: help;
+  color: var(--cor-marca);
+}
+
+/* no resumo o número já aparece em cima, então a barra vai sem rótulo */
+.resumo .barra {
+  margin-top: 0.35rem;
+}
+
+.resumo .barra-valor {
+  display: none;
+}
+
+.transicoes {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem;
+  margin-top: 1.25rem;
+  padding-top: 1.25rem;
+  border-top: 1px solid var(--cor-borda);
+}
+
+.transicoes-rotulo {
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: var(--cor-texto-suave);
+}
+
+/* abas com sublinhado; rolam na horizontal em tela pequena */
+.abas {
+  flex-wrap: nowrap;
+  gap: 0.25rem;
+  overflow-x: auto;
+  scrollbar-width: none;
+  border-bottom: 1px solid var(--cor-borda);
+}
+
+.abas .nav-link {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin-bottom: -1px;
+  padding: 0.7rem 0.9rem;
+  font-weight: 500;
+  white-space: nowrap;
+  color: var(--cor-texto-suave);
+  background: none;
+  border: 0;
+  border-bottom: 2px solid transparent;
+  border-radius: 0;
+}
+
+.abas .nav-link:hover {
+  color: var(--cor-texto);
+}
+
+.abas .nav-link.active {
+  color: var(--cor-marca-escura);
+  border-bottom-color: var(--cor-marca);
+}
+
+.abas .nav-link.active .contador {
+  background: var(--cor-marca-suave);
+  color: var(--cor-marca-escura);
+}
+
+/* aba itens */
+.categoria {
+  overflow: hidden;
+}
+
+.categoria-cabecalho {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.85rem 1rem;
+  background: var(--cor-superficie-2);
+  border-bottom: 1px solid var(--cor-borda);
+}
+
+.categoria-nome {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.categoria-meta {
+  font-size: 0.8125rem;
+  color: var(--cor-texto-suave);
+}
+
+.categoria-alerta {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  margin-top: 0.2rem;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: #b45309;
+}
+
+.unidade-item:empty {
+  display: none;
+}
+
+.categoria-vazia {
+  margin: 0;
+  padding: 1rem;
+  font-size: 0.875rem;
+  color: var(--cor-texto-suave);
+}
+
+.linha-item {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.7rem 1rem;
+}
+
+.linha-item-principal {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.linha-item .chips {
+  justify-content: flex-end;
+}
+
+.linha-item-nome {
+  margin-right: 0.4rem;
+  font-weight: 500;
+}
+
+.linha-item-qtd {
+  font-size: 0.875rem;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  color: var(--cor-texto-medio);
+}
+
+/* linhas com alérgeno em conflito */
+.table .linha-alerta > * {
+  --bs-table-bg-state: #fff8e6;
+}
+
+.avisos {
+  margin: 0.35rem 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.aviso-alergeno {
+  display: flex;
+  gap: 0.35rem;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: #b45309;
+}
+
+.aviso-alergeno::before {
+  content: '⚠';
+}
+
+.afetados {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-weight: 600;
+  color: #b45309;
+}
+
+/* aba cobertura */
+.cobertura-geral {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 1rem 2rem;
+}
+
+.cobertura-numero {
+  font-size: 2.5rem;
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: -0.03em;
+  color: var(--cor-marca-escura);
+}
+
+.cobertura-geral .barra {
+  flex: 1 1 14rem;
+}
+
+.cobertura-geral .barra-valor {
+  display: none;
+}
+
+.categoria-cobertura + .categoria-cobertura {
+  margin-top: 1rem;
+}
+
+.categoria-cobertura-topo {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.5rem;
+  margin-bottom: 0.35rem;
+  font-size: 0.875rem;
+}
+
+.coluna-barra {
+  min-width: 11rem;
+}
+
+/* aba restrições */
+.observacao {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.observacao + .observacao {
+  margin-top: 0.75rem;
+}
+
+.resumo-restricao {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.4rem 0.75rem 0.4rem 0.4rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  background: #eef2ff;
+  color: #3730a3;
+  border-radius: 999px;
+}
+
+.resumo-restricao-qtd {
+  display: inline-grid;
+  place-items: center;
+  min-width: 1.6rem;
+  height: 1.6rem;
+  padding: 0 0.4rem;
+  font-size: 0.8rem;
+  font-weight: 700;
+  background: #fff;
+  border-radius: 999px;
+}

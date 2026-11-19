@@ -1,11 +1,13 @@
 import { describe, expect, it } from 'vitest';
-import { aceitaContribuicoes, botaoDaTransicao, podeEditar, transicoesVisiveis } from '../src/logica/status.js';
+import { aceitaContribuicoes, botaoDaTransicao, confirmacaoDaTransicao, podeEditar, transicoesVisiveis } from '../src/logica/status.js';
 
 const PRAZO = '2026-12-16T18:00:00';
 const ANTES_DO_PRAZO = new Date('2026-12-10T10:00:00');
 const DEPOIS_DO_PRAZO = new Date('2026-12-17T10:00:00');
+const DATA = '2026-12-18T08:00:00';
+const DEPOIS_DO_EVENTO = new Date('2026-12-18T09:00:00');
 
-const evento = (status, proximosStatus) => ({ status, proximosStatus, prazoAlteracoes: PRAZO });
+const evento = (status, proximosStatus) => ({ status, proximosStatus, prazoAlteracoes: PRAZO, dataHora: DATA });
 
 describe('transicoesVisiveis', () => {
   it('mostra as transições que o back permite', () => {
@@ -17,11 +19,16 @@ describe('transicoesVisiveis', () => {
 
   it('mostra reabrir antes do prazo', () => {
     expect(transicoesVisiveis(evento('ENCERRADO', ['REALIZADO', 'ABERTO', 'CANCELADO']), ANTES_DO_PRAZO))
-      .toEqual(['REALIZADO', 'ABERTO', 'CANCELADO']);
+      .toEqual(['ABERTO', 'CANCELADO']);
   });
 
   it('esconde reabrir depois do prazo', () => {
     expect(transicoesVisiveis(evento('ENCERRADO', ['REALIZADO', 'ABERTO', 'CANCELADO']), DEPOIS_DO_PRAZO))
+      .toEqual(['CANCELADO']);
+  });
+
+  it('só mostra marcar como realizado depois da data do evento', () => {
+    expect(transicoesVisiveis(evento('ENCERRADO', ['REALIZADO', 'ABERTO', 'CANCELADO']), DEPOIS_DO_EVENTO))
       .toEqual(['REALIZADO', 'CANCELADO']);
   });
 
@@ -39,6 +46,18 @@ describe('botaoDaTransicao', () => {
 
   it('cancelar tem estilo de perigo', () => {
     expect(botaoDaTransicao('ABERTO', 'CANCELADO')).toEqual({ texto: 'Cancelar evento', estilo: 'outline-danger' });
+  });
+});
+
+describe('confirmacaoDaTransicao', () => {
+  it('avisa que realizado e cancelado são finais', () => {
+    expect(confirmacaoDaTransicao('ENCERRADO', 'REALIZADO').texto).toContain('final');
+    expect(confirmacaoDaTransicao('ABERTO', 'CANCELADO')).toMatchObject({ botao: 'Cancelar evento', estilo: 'danger' });
+  });
+
+  it('diferencia abrir de reabrir', () => {
+    expect(confirmacaoDaTransicao('RASCUNHO', 'ABERTO').titulo).toBe('Abrir o evento?');
+    expect(confirmacaoDaTransicao('ENCERRADO', 'ABERTO').titulo).toBe('Reabrir o evento?');
   });
 });
 

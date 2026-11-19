@@ -14,3 +14,17 @@ export function validarContribuicao({ participanteId, itemId, quantidade }, falt
   }
   return erros;
 }
+
+// para meta e quantidade necessária: inteiro maior que zero; null quando está tudo certo
+export function erroDeQuantidade(valor) {
+  if (valor === '' || valor === null || valor === undefined) return 'Informe um valor.';
+  const numero = Number(valor);
+  if (!Number.isInteger(numero)) return 'Use um número inteiro, sem casas decimais.';
+  if (numero <= 0) return 'Deve ser maior que zero.';
+  return null;
+}
+
+// "" vira null (campo vazio), mas "0" continua 0: assim o back responde "maior que zero" e não "obrigatório"
+export function paraNumero(valor) {
+  return valor === '' || valor === null || valor === undefined ? null : Number(valor);
+}

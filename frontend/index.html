@@ -5,20 +5,32 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Sulwork Eventos</title>
   </head>
-  <body class="bg-light">
-    <nav class="navbar navbar-expand navbar-dark bg-primary mb-4">
+  <body>
+    <nav class="navbar navbar-expand barra-topo">
       <div class="container">
-        <a class="navbar-brand" href="#/eventos">Sulwork Eventos</a>
-        <div class="navbar-nav">
-          <a class="nav-link" href="#/eventos">Eventos</a>
-          <a class="nav-link" href="#/participantes">Participantes</a>
+        <a class="navbar-brand marca" href="#/eventos">
+          <span class="marca-icone"><i class="bi bi-basket2-fill"></i></span>
+          <span>Sulwork <span class="marca-sub">Eventos</span></span>
+        </a>
+        <div class="navbar-nav gap-1">
+          <a class="nav-link" href="#/eventos" data-nav="eventos">
+            <i class="bi bi-calendar-event"></i><span class="d-none d-sm-inline">Eventos</span>
+          </a>
+          <a class="nav-link" href="#/participantes" data-nav="participantes">
+            <i class="bi bi-people"></i><span class="d-none d-sm-inline">Participantes</span>
+          </a>
         </div>
       </div>
     </nav>
-    <div class="container">
+
+    <div class="container py-4">
       <div id="alertas"></div>
+      <div id="carregando" class="carregando" hidden>
+        <div class="spinner-border" role="status"><span class="visually-hidden">Carregando...</span></div>
+      </div>
       <main id="app"></main>
     </div>
+
     <script type="module" src="/src/main.js"></script>
   </body>
 </html>

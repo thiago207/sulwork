@@ -1,0 +1,105 @@
+<div id="categorias"></div>
+
+<div class="vazio mb-3" id="sem-categorias" hidden>
+  <i class="bi bi-inboxes"></i>
+  <p>Nenhuma categoria cadastrada ainda.</p>
+</div>
+
+<div class="row g-3" id="formularios-itens">
+  <div class="col-lg-5">
+    <form id="form-categoria" class="card h-100" novalidate>
+      <div class="card-body">
+        <h3 class="titulo-card"><i class="bi bi-folder-plus"></i> Nova categoria</h3>
+        <div class="mb-3">
+          <label class="form-label" for="categoria-nome">Nome</label>
+          <input class="form-control" id="categoria-nome" name="nome" placeholder="Ex.: Bebidas" required>
+          <div class="invalid-feedback" data-erro="nome"></div>
+        </div>
+        <div class="row g-2 mb-3">
+          <div class="col-5">
+            <label class="form-label" for="categoria-meta">Meta</label>
+            <input class="form-control" id="categoria-meta" name="meta" type="number" min="1" step="1" required>
+            <div class="invalid-feedback" data-erro="meta"></div>
+          </div>
+          <div class="col-7">
+            <label class="form-label" for="categoria-unidade">Unidade</label>
+            <select class="form-select" id="categoria-unidade" name="unidade"></select>
+          </div>
+        </div>
+        <button class="btn btn-outline-primary w-100" type="submit"><i class="bi bi-plus-lg"></i> Adicionar categoria</button>
+      </div>
+    </form>
+  </div>
+
+  <div class="col-lg-7" id="coluna-item">
+    <form id="form-item" class="card h-100" novalidate>
+      <div class="card-body">
+        <h3 class="titulo-card"><i class="bi bi-plus-square"></i> Novo item</h3>
+        <div class="row g-2 mb-1">
+          <div class="col-md-5">
+            <label class="form-label" for="item-nome">Nome</label>
+            <input class="form-control" id="item-nome" name="nome" placeholder="Ex.: Suco de laranja" required>
+            <div class="invalid-feedback" data-erro="nome"></div>
+          </div>
+          <div class="col-md-3">
+            <label class="form-label" for="item-categoria">Categoria</label>
+            <select class="form-select" id="item-categoria" name="categoriaId"></select>
+          </div>
+          <div class="col-md-4">
+            <label class="form-label" for="item-quantidade">Quantidade</label>
+            <div class="input-group has-validation">
+              <input class="form-control" id="item-quantidade" name="quantidadeNecessaria" type="number" min="1" step="1" required>
+              <span class="input-group-text unidade-item" id="item-unidade"></span>
+              <div class="invalid-feedback" data-erro="quantidadeNecessaria"></div>
+            </div>
+          </div>
+        </div>
+        <p class="form-text mt-0 mb-3">
+          <i class="bi bi-info-circle"></i> O item usa a unidade da categoria escolhida.
+        </p>
+        <div class="form-check form-switch mb-3">
+          <input class="form-check-input" type="checkbox" role="switch" name="obrigatorio" id="item-obrigatorio">
+          <label class="form-check-label" for="item-obrigatorio">Item obrigatório</label>
+        </div>
+        <fieldset class="mb-3">
+          <legend class="form-label">Alérgenos</legend>
+          <div class="opcoes-chip" id="opcoes-alergenos"></div>
+        </fieldset>
+        <button class="btn btn-outline-primary w-100" type="submit"><i class="bi bi-plus-lg"></i> Adicionar item</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<template data-modelo="categoria">
+  <section class="card categoria mb-3">
+    <header class="categoria-cabecalho">
+      <div class="min-w-0">
+        <h3 class="categoria-nome" data-campo="nome"></h3>
+        <span class="categoria-meta" data-campo="meta"></span>
+        <span class="categoria-alerta" data-campo="alerta">
+          <i class="bi bi-exclamation-triangle-fill"></i><span data-campo="alerta-texto"></span>
+        </span>
+      </div>
+      <button class="btn btn-sm btn-icone" type="button" data-acao="excluir-categoria" title="Remover categoria" aria-label="Remover categoria">
+        <i class="bi bi-trash3"></i>
+      </button>
+    </header>
+    <ul class="list-group list-group-flush" data-campo="itens"></ul>
+    <p class="categoria-vazia" data-campo="vazia">Sem itens nesta categoria.</p>
+  </section>
+</template>
+
+<template data-modelo="item">
+  <li class="list-group-item linha-item">
+    <div class="linha-item-principal">
+      <span class="linha-item-nome" data-campo="nome"></span>
+      <span class="chip chip-obrigatorio" data-campo="obrigatorio">obrigatório</span>
+    </div>
+    <div class="chips" data-campo="alergenos"></div>
+    <span class="linha-item-qtd" data-campo="quantidade"></span>
+    <button class="btn btn-sm btn-icone" type="button" data-acao="excluir-item" title="Remover item" aria-label="Remover item">
+      <i class="bi bi-x-lg"></i>
+    </button>
+  </li>
+</template>

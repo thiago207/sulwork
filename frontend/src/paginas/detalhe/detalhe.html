@@ -1,0 +1,88 @@
+<a class="voltar" href="#/eventos"><i class="bi bi-arrow-left"></i> Eventos</a>
+
+<section class="card cabecalho-evento mb-4" id="cabecalho-evento">
+  <div class="card-body">
+    <div class="d-flex flex-wrap justify-content-between gap-3">
+      <div class="min-w-0">
+        <div class="d-flex flex-wrap align-items-center gap-2 mb-2">
+          <span class="badge-status" data-campo="status"></span>
+          <span class="tipo-evento"><i class="bi" id="icone-tipo"></i> <span data-campo="tipo"></span></span>
+        </div>
+        <h1 class="cabecalho-evento-nome" data-campo="nome"></h1>
+        <p class="cabecalho-evento-descricao" data-campo="descricao"></p>
+        <div class="metas">
+          <span><i class="bi bi-calendar-event"></i><span data-campo="data"></span></span>
+          <span><i class="bi bi-hourglass-split"></i>Alterações até <span data-campo="prazo"></span></span>
+        </div>
+      </div>
+      <div class="acoes-evento">
+        <a class="btn btn-primary" id="levar"><i class="bi bi-basket"></i> O que eu posso levar?</a>
+        <a class="btn btn-light" id="editar"><i class="bi bi-pencil"></i> Editar</a>
+        <button class="btn btn-light text-danger" type="button" data-acao="excluir-evento" id="excluir">
+          <i class="bi bi-trash3"></i> Excluir
+        </button>
+      </div>
+    </div>
+
+    <div class="resumo">
+      <div class="resumo-item">
+        <div class="resumo-rotulo">Participantes</div>
+        <div class="resumo-valor" data-campo="participantes"></div>
+      </div>
+      <div class="resumo-item">
+        <div class="resumo-rotulo">
+          Cobertura geral
+          <i class="bi bi-info-circle ajuda" tabindex="0" data-bs-toggle="tooltip" data-bs-placement="top"
+             data-bs-title="Média ponderada da cobertura dos itens: cada obrigatório pesa 2 e cada opcional pesa 1. Ex.: obrigatório em 33,3% e opcional em 100% dá (33,3 × 2 + 100) ÷ 3 = 55,6%."></i>
+        </div>
+        <div class="resumo-valor" data-campo="cobertura"></div>
+        <div data-barra></div>
+      </div>
+      <div class="resumo-item">
+        <div class="resumo-rotulo">Obrigatórios completos</div>
+        <div class="resumo-valor" data-campo="obrigatorios"></div>
+      </div>
+    </div>
+
+    <div class="transicoes" id="transicoes">
+      <span class="transicoes-rotulo">Mudar status</span>
+      <div class="d-flex flex-wrap gap-2" id="botoes-status"></div>
+    </div>
+  </div>
+</section>
+
+<ul class="nav abas mb-4" role="tablist">
+  <li class="nav-item" role="presentation">
+    <button class="nav-link" type="button" role="tab" data-bs-toggle="tab" data-bs-target="#aba-itens" data-aba="itens">
+      <i class="bi bi-list-check"></i> Itens <span class="contador" data-contador="itens"></span>
+    </button>
+  </li>
+  <li class="nav-item" role="presentation">
+    <button class="nav-link" type="button" role="tab" data-bs-toggle="tab" data-bs-target="#aba-participantes" data-aba="participantes">
+      <i class="bi bi-people"></i> Participantes <span class="contador" data-contador="participantes"></span>
+    </button>
+  </li>
+  <li class="nav-item" role="presentation">
+    <button class="nav-link" type="button" role="tab" data-bs-toggle="tab" data-bs-target="#aba-contribuicoes" data-aba="contribuicoes">
+      <i class="bi bi-box2-heart"></i> Contribuições <span class="contador" data-contador="contribuicoes"></span>
+    </button>
+  </li>
+  <li class="nav-item" role="presentation">
+    <button class="nav-link" type="button" role="tab" data-bs-toggle="tab" data-bs-target="#aba-cobertura" data-aba="cobertura">
+      <i class="bi bi-bar-chart"></i> Cobertura
+    </button>
+  </li>
+  <li class="nav-item" role="presentation">
+    <button class="nav-link" type="button" role="tab" data-bs-toggle="tab" data-bs-target="#aba-restricoes" data-aba="restricoes">
+      <i class="bi bi-shield-exclamation"></i> Restrições e alérgenos
+    </button>
+  </li>
+</ul>
+
+<div class="tab-content">
+  <div class="tab-pane fade" id="aba-itens" role="tabpanel"></div>
+  <div class="tab-pane fade" id="aba-participantes" role="tabpanel"></div>
+  <div class="tab-pane fade" id="aba-contribuicoes" role="tabpanel"></div>
+  <div class="tab-pane fade" id="aba-cobertura" role="tabpanel"></div>
+  <div class="tab-pane fade" id="aba-restricoes" role="tabpanel"></div>
+</div>

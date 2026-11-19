@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { api } from '../src/api.js';
-import { renderListaEventos } from '../src/paginas/listaEventos.js';
+import { renderListaEventos } from '../src/paginas/eventos/lista.js';
 
 // troca o módulo inteiro da API por funções falsas: nada de rede no teste
 vi.mock('../src/api.js', () => ({
@@ -14,6 +14,7 @@ const eventos = [
 
 describe('tela de lista de eventos', () => {
   let container;
+  const cartoes = () => container.querySelectorAll('#lista-eventos .evento-card');
 
   beforeEach(() => {
     document.body.innerHTML = '<div id="alertas"></div><main id="app"></main>';
@@ -21,26 +22,32 @@ describe('tela de lista de eventos', () => {
     api.listarEventos.mockReset();
   });
 
-  it('mostra uma linha por evento com o status em badge', async () => {
+  it('mostra um card por evento com data, tipo e status', async () => {
     api.listarEventos.mockResolvedValue(eventos);
 
     await renderListaEventos(container);
 
-    const linhas = container.querySelectorAll('tbody tr');
-    expect(linhas).toHaveLength(2);
-    expect(linhas[0].querySelector('a').getAttribute('href')).toBe('#/eventos/1');
-    expect(linhas[0].textContent).toContain('Café da manhã');
-    expect(linhas[0].querySelector('.badge').textContent).toBe('Aberto');
-    expect(linhas[0].querySelector('.badge').classList).toContain('text-bg-success');
+    expect(cartoes()).toHaveLength(2);
+    const primeiro = cartoes()[0];
+    expect(primeiro.getAttribute('href')).toBe('#/eventos/1');
+    expect(primeiro.querySelector('[data-campo="dia"]').textContent).toBe('18');
+    expect(primeiro.querySelector('[data-campo="mes"]').textContent).toBe('dez');
+    expect(primeiro.textContent).toContain('Café da manhã');
+    expect(primeiro.querySelector('.bi').classList).toContain('bi-cup-hot');
+
+    const status = primeiro.querySelector('.badge-status');
+    expect(status.textContent).toBe('Aberto');
+    expect(status.dataset.status).toBe('ABERTO');
+    expect(container.querySelector('#sem-eventos').hidden).toBe(true);
   });
 
-  it('escapa o nome vindo da API em vez de interpretar como HTML', async () => {
+  it('mostra o nome vindo da API como texto em vez de interpretar como HTML', async () => {
     api.listarEventos.mockResolvedValue(eventos);
 
     await renderListaEventos(container);
 
-    expect(container.querySelector('tbody img')).toBeNull();
-    expect(container.querySelectorAll('tbody tr')[1].textContent).toContain('<img src=x onerror=alert(1)>');
+    expect(container.querySelector('#lista-eventos img')).toBeNull();
+    expect(cartoes()[1].querySelector('[data-campo="nome"]').textContent).toBe('<img src=x onerror=alert(1)>');
   });
 
   it('filtrar por status chama a API com o status escolhido', async () => {
@@ -48,18 +55,20 @@ describe('tela de lista de eventos', () => {
     await renderListaEventos(container);
 
     const filtro = container.querySelector('#filtro-status');
+    expect(filtro.options).toHaveLength(6);
     filtro.value = 'ABERTO';
     filtro.dispatchEvent(new Event('change'));
-    await vi.waitFor(() => expect(container.querySelectorAll('tbody tr')).toHaveLength(1));
+    await vi.waitFor(() => expect(cartoes()).toHaveLength(1));
 
     expect(api.listarEventos).toHaveBeenLastCalledWith('ABERTO');
   });
 
-  it('mostra mensagem quando não há eventos', async () => {
+  it('mostra o aviso de lista vazia quando não há eventos', async () => {
     api.listarEventos.mockResolvedValue([]);
 
     await renderListaEventos(container);
 
-    expect(container.textContent).toContain('Nenhum evento encontrado.');
+    expect(cartoes()).toHaveLength(0);
+    expect(container.querySelector('#sem-eventos').hidden).toBe(false);
   });
 });

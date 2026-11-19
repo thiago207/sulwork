@@ -1,0 +1,68 @@
+<section class="card mb-4">
+  <div class="card-body p-4">
+    <div class="cobertura-geral">
+      <div>
+        <div class="resumo-rotulo">Cobertura geral</div>
+        <div class="cobertura-numero" id="cobertura-numero"></div>
+      </div>
+      <div id="cobertura-barra" class="flex-grow-1"></div>
+      <div>
+        <div class="resumo-rotulo">Obrigatórios completos</div>
+        <div class="resumo-valor"><i class="bi bi-patch-check text-success"></i> <span id="cobertura-obrigatorios"></span></div>
+      </div>
+    </div>
+    <p class="small text-secondary mt-3 mb-0">Na média geral, itens obrigatórios pesam 2 e opcionais pesam 1.</p>
+  </div>
+</section>
+
+<div class="row g-4">
+  <div class="col-lg-4">
+    <section class="card h-100">
+      <div class="card-body">
+        <h3 class="titulo-card"><i class="bi bi-folder2-open"></i> Por categoria</h3>
+        <div id="cobertura-categorias"></div>
+        <p class="small text-secondary mb-0" id="cobertura-sem-categorias" hidden>Sem categorias.</p>
+      </div>
+    </section>
+  </div>
+  <div class="col-lg-8">
+    <section class="card h-100">
+      <div class="table-responsive">
+        <table class="table align-middle">
+          <thead>
+            <tr>
+              <th>Item</th>
+              <th>Contribuído</th>
+              <th class="coluna-barra">Cobertura</th>
+            </tr>
+          </thead>
+          <tbody id="cobertura-itens"></tbody>
+        </table>
+      </div>
+    </section>
+  </div>
+</div>
+
+<template data-modelo="categoria-cobertura">
+  <div class="categoria-cobertura">
+    <div class="categoria-cobertura-topo">
+      <span class="fw-medium" data-campo="nome"></span>
+      <span class="text-secondary text-nowrap" data-campo="valores"></span>
+    </div>
+    <div data-barra></div>
+  </div>
+</template>
+
+<template data-modelo="item-cobertura">
+  <tr>
+    <td>
+      <span class="fw-medium" data-campo="nome"></span>
+      <span class="chip chip-obrigatorio" data-campo="obrigatorio">obrigatório</span>
+    </td>
+    <td class="text-nowrap">
+      <div data-campo="valores"></div>
+      <div class="small" data-campo="situacao"></div>
+    </td>
+    <td><div data-barra></div></td>
+  </tr>
+</template>

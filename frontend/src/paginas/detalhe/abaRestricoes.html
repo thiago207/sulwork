@@ -1,0 +1,66 @@
+<section class="card mb-4">
+  <div class="card-body">
+    <h3 class="titulo-card">
+      <i class="bi bi-people"></i> Restrições no evento
+      <span class="contador" id="restricoes-ativos"></span>
+    </h3>
+    <div class="d-flex flex-wrap gap-2" id="restricoes-resumo"></div>
+    <p class="text-secondary mb-0" id="restricoes-nenhuma" hidden>Nenhum participante com restrição.</p>
+  </div>
+</section>
+
+<section class="card mb-4" id="caixa-observacoes">
+  <div class="card-body">
+    <h3 class="titulo-card"><i class="bi bi-chat-left-text"></i> Observações dos participantes</h3>
+    <ul class="list-unstyled mb-0 observacoes" id="observacoes"></ul>
+  </div>
+</section>
+
+<section class="card" id="caixa-restricoes-itens">
+  <div class="table-responsive">
+    <table class="table align-middle">
+      <thead>
+        <tr>
+          <th>Item</th>
+          <th>Alérgenos</th>
+          <th>Participantes afetados</th>
+        </tr>
+      </thead>
+      <tbody id="restricoes-itens"></tbody>
+    </table>
+  </div>
+</section>
+
+<template data-modelo="observacao">
+  <li class="observacao">
+    <span class="avatar avatar-pequeno" data-campo="iniciais"></span>
+    <div>
+      <div class="fw-medium" data-campo="nome"></div>
+      <div class="text-secondary small" data-campo="texto"></div>
+    </div>
+  </li>
+</template>
+
+<template data-modelo="resumo-restricao">
+  <span class="resumo-restricao">
+    <span class="resumo-restricao-qtd" data-campo="quantidade"></span>
+    <span data-campo="restricao"></span>
+  </span>
+</template>
+
+<template data-modelo="item-restricao">
+  <tr>
+    <td class="fw-medium" data-campo="nome"></td>
+    <td>
+      <div class="chips" data-campo="alergenos"></div>
+      <span class="small text-secondary" data-campo="sem-alergenos">nenhum</span>
+    </td>
+    <td>
+      <div data-campo="com-afetados">
+        <span class="afetados"><i class="bi bi-exclamation-triangle-fill"></i><span data-campo="afetados"></span></span>
+        <div class="chips mt-1" data-campo="conflitos"></div>
+      </div>
+      <span class="small fw-medium text-success" data-campo="sem-afetados"><i class="bi bi-check-circle"></i> nenhum</span>
+    </td>
+  </tr>
+</template>

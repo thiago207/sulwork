@@ -1,0 +1,22 @@
+.busca {
+  position: relative;
+  flex: 0 1 15rem;
+}
+
+.busca .bi {
+  position: absolute;
+  top: 50%;
+  left: 0.65rem;
+  transform: translateY(-50%);
+  font-size: 0.8rem;
+  color: var(--cor-texto-suave);
+}
+
+.busca .form-control {
+  padding-left: 1.9rem;
+}
+
+/* destaca quem está sendo editado */
+.pessoa.editando {
+  background: var(--cor-marca-suave);
+}

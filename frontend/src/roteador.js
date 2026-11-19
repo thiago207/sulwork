@@ -1,19 +1,25 @@
-import { limparAlertas, mostrarErro } from './ui.js';
-import { renderListaEventos } from './paginas/listaEventos.js';
-import { renderFormEvento } from './paginas/formEvento.js';
-import { renderDetalheEvento } from './paginas/detalheEvento.js';
-import { renderParticipantes } from './paginas/participantes.js';
-import { renderSugestoes } from './paginas/sugestoes.js';
+import { limparAlertas, mostrarErro, mostrarSucessoPendente } from './ui.js';
+import { renderListaEventos } from './paginas/eventos/lista.js';
+import { renderFormEvento } from './paginas/eventos/formulario.js';
+import { ABAS, renderDetalheEvento } from './paginas/detalhe/detalhe.js';
+import { renderParticipantes } from './paginas/participantes/participantes.js';
+import { renderSugestoes } from './paginas/sugestoes/sugestoes.js';
 
-// a ordem importa: "novo" precisa vir antes de ":id"
+// a ordem importa: "novo" precisa vir antes de ":id"; a aba do detalhe fica na URL (#/eventos/1/cobertura)
 const rotas = [
   [/^#\/eventos\/novo$/, renderFormEvento],
   [/^#\/eventos\/(\d+)\/editar$/, renderFormEvento],
   [/^#\/eventos\/(\d+)\/levar$/, renderSugestoes],
-  [/^#\/eventos\/(\d+)$/, renderDetalheEvento],
+  [new RegExp(`^#\\/eventos\\/(\\d+)(?:\\/(${ABAS.join('|')}))?$`), renderDetalheEvento],
   [/^#\/participantes$/, renderParticipantes],
   [/^#\/eventos$/, renderListaEventos],
 ];
+
+function marcarMenu(hash) {
+  document.querySelectorAll('[data-nav]').forEach((link) => {
+    link.classList.toggle('active', hash.startsWith(`#/${link.dataset.nav}`));
+  });
+}
 
 async function navegar(container) {
   const hash = location.hash || '#/eventos';
@@ -23,14 +29,22 @@ async function navegar(container) {
     return;
   }
   const [padrao, pagina] = rota;
-  const [, id] = hash.match(padrao);
+  const [, id, aba] = hash.match(padrao);
+  const carregando = document.getElementById('carregando');
+
   limparAlertas();
-  container.innerHTML = '<div class="text-center p-5"><div class="spinner-border"></div></div>';
+  marcarMenu(hash);
+  container.replaceChildren();
+  carregando.hidden = false;
+  window.scrollTo(0, 0);
   try {
-    await pagina(container, { id: id ? Number(id) : null });
+    await pagina(container, { id: id ? Number(id) : null, aba });
+    mostrarSucessoPendente();
   } catch (erro) {
-    container.innerHTML = '';
+    container.replaceChildren();
     mostrarErro(erro);
+  } finally {
+    carregando.hidden = true;
   }
 }
 

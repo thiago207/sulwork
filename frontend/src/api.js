@@ -56,6 +56,7 @@ export const api = {
 
   listarParticipantes: () => get('/participantes'),
   criarParticipante: (dados) => post('/participantes', dados),
+  editarParticipante: (id, dados) => put(`/participantes/${id}`, dados),
   excluirParticipante: (id) => remover(`/participantes/${id}`),
 
   listarParticipantesDoEvento: (eventoId) => get(`/eventos/${eventoId}/participantes`),

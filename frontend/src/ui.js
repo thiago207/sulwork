@@ -1,51 +1,76 @@
-// todo texto vindo da API passa por aqui antes de ir para o innerHTML (evita XSS)
-export function escapar(valor) {
-  return String(valor ?? '')
-    .replaceAll('&', '&amp;')
-    .replaceAll('<', '&lt;')
-    .replaceAll('>', '&gt;')
-    .replaceAll('"', '&quot;')
-    .replaceAll("'", '&#39;');
-}
+import modeloAlerta from './componentes/alerta.html?raw';
+import { campo, criar, instanciar, preencher } from './dom.js';
+import { CAMPOS, rotulo } from './logica/rotulos.js';
 
-function areaAlertas() {
-  return document.getElementById('alertas');
-}
+const ICONES = {
+  danger: 'bi-x-circle-fill',
+  success: 'bi-check-circle-fill',
+  warning: 'bi-exclamation-triangle-fill',
+};
 
 export function limparAlertas() {
-  const area = areaAlertas();
-  if (area) area.innerHTML = '';
+  document.getElementById('alertas')?.replaceChildren();
 }
 
-export function mostrarAlerta(tipo, conteudoHtml) {
-  const area = areaAlertas();
-  if (!area) return;
-  area.insertAdjacentHTML('beforeend', `
-    <div class="alert alert-${tipo} alert-dismissible" role="alert">
-      ${conteudoHtml}
-      <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Fechar"></button>
-    </div>`);
+function mostrarAlerta(tipo, { titulo = '', mensagem = '', itens = [] }) {
+  const area = document.getElementById('alertas');
+  if (!area) return null;
+  const alerta = instanciar(modeloAlerta);
+  alerta.classList.add(`alert-${tipo}`);
+  alerta.querySelector('[data-icone]').classList.add(ICONES[tipo]);
+  preencher(alerta, { titulo, mensagem });
+  campo(alerta, 'titulo').hidden = !titulo;
+  campo(alerta, 'mensagem').hidden = !mensagem;
+  campo(alerta, 'itens').replaceChildren(...itens.map((texto) => criar('li', '', texto)));
+  campo(alerta, 'itens').hidden = !itens.length;
+  area.append(alerta);
+  return alerta;
 }
 
 export function mostrarErro(erro) {
-  const campos = erro.campos?.length
-    ? `<ul class="mb-0 mt-2">${erro.campos.map((c) => `<li><strong>${escapar(c.campo)}</strong>: ${escapar(c.mensagem)}</li>`).join('')}</ul>`
-    : '';
-  mostrarAlerta('danger', `${escapar(erro.message ?? 'Erro inesperado.')}${campos}`);
+  mostrarAlerta('danger', {
+    mensagem: erro.message ?? 'Erro inesperado.',
+    itens: (erro.campos ?? []).map((c) => `${rotulo(CAMPOS, c.campo)}: ${c.mensagem}`),
+  });
 }
 
 export function mostrarSucesso(mensagem) {
-  mostrarAlerta('success', escapar(mensagem));
+  const alerta = mostrarAlerta('success', { mensagem });
+  // sucesso some sozinho; erro e aviso ficam até a pessoa fechar
+  setTimeout(() => alerta?.remove(), 4000);
 }
 
 export function mostrarAvisos(avisos) {
   if (!avisos?.length) return;
-  mostrarAlerta('warning', `
-    <h6 class="alert-heading fw-bold">⚠ Atenção aos alérgenos</h6>
-    <ul class="mb-0">${avisos.map((a) => `<li>${escapar(a)}</li>`).join('')}</ul>`);
+  mostrarAlerta('warning', { titulo: 'Atenção aos alérgenos', itens: avisos });
 }
 
-// executa uma ação da API e mostra o erro em alerta, sem deixar a exceção escapar
+// o roteador limpa os alertas ao trocar de tela; esta mensagem aparece depois que a próxima tela carregar
+let sucessoPendente = null;
+
+export function sucessoNaProximaTela(mensagem) {
+  sucessoPendente = mensagem;
+}
+
+export function mostrarSucessoPendente() {
+  if (sucessoPendente) mostrarSucesso(sucessoPendente);
+  sucessoPendente = null;
+}
+
+// erros: { nomeDoCampo: 'mensagem' }; a mensagem aparece no <div data-erro="nomeDoCampo">
+export function marcarErros(form, erros) {
+  form.querySelectorAll('[name]').forEach((entrada) => entrada.classList.toggle('is-invalid', Boolean(erros[entrada.name])));
+  form.querySelectorAll('[data-erro]').forEach((div) => { div.textContent = erros[div.dataset.erro] ?? ''; });
+}
+
+// campos que existem no formulário ficam vermelhos com a mensagem embaixo; o resto vai para o alerta
+export function mostrarErroNoForm(form, erro) {
+  const campos = erro.campos ?? [];
+  const noForm = campos.filter((c) => form.elements[c.campo]);
+  marcarErros(form, Object.fromEntries(noForm.map((c) => [c.campo, c.mensagem])));
+  mostrarErro({ message: erro.message, campos: campos.filter((c) => !form.elements[c.campo]) });
+}
+
 export async function tentar(acao) {
   try {
     return await acao();
@@ -53,10 +78,4 @@ export async function tentar(acao) {
     mostrarErro(erro);
     return undefined;
   }
-}
-
-export function opcoes(lista, valorAtual = '') {
-  return lista
-    .map(([valor, texto]) => `<option value="${escapar(valor)}" ${String(valor) === String(valorAtual) ? 'selected' : ''}>${escapar(texto)}</option>`)
-    .join('');
 }

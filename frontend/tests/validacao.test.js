@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { validarContribuicao } from '../src/logica/validacao.js';
+import { erroDeQuantidade, paraNumero, validarContribuicao } from '../src/logica/validacao.js';
 
 const valida = { participanteId: '1', itemId: '2', quantidade: '3' };
 
@@ -32,5 +32,25 @@ describe('validarContribuicao', () => {
 
   it('sem faltante conhecido não limita a quantidade', () => {
     expect(validarContribuicao({ ...valida, quantidade: '999' })).toEqual({});
+  });
+});
+
+describe('erroDeQuantidade', () => {
+  it('aceita inteiro positivo', () => {
+    expect(erroDeQuantidade('3')).toBeNull();
+  });
+
+  it('diferencia vazio, decimal e zero', () => {
+    expect(erroDeQuantidade('')).toBe('Informe um valor.');
+    expect(erroDeQuantidade('2.5')).toBe('Use um número inteiro, sem casas decimais.');
+    expect(erroDeQuantidade('0')).toBe('Deve ser maior que zero.');
+  });
+});
+
+describe('paraNumero', () => {
+  it('zero continua zero e vazio vira null', () => {
+    expect(paraNumero('0')).toBe(0);
+    expect(paraNumero('')).toBeNull();
+    expect(paraNumero('7')).toBe(7);
   });
 });

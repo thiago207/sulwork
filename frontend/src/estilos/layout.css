@@ -1,0 +1,145 @@
+/* estrutura que se repete em todas as páginas */
+.barra-topo {
+  --bs-navbar-color: var(--cor-texto-suave);
+  --bs-navbar-hover-color: var(--cor-texto);
+  --bs-navbar-active-color: var(--cor-marca-escura);
+  --bs-navbar-brand-color: var(--cor-texto);
+  --bs-navbar-brand-hover-color: var(--cor-texto);
+  --bs-navbar-nav-link-padding-x: 0.8rem;
+  position: sticky;
+  top: 0;
+  z-index: 1020;
+  background: rgb(255 255 255 / 88%);
+  backdrop-filter: blur(8px);
+  border-bottom: 1px solid var(--cor-borda);
+}
+
+.marca {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  font-weight: 700;
+}
+
+.marca-icone {
+  display: inline-grid;
+  place-items: center;
+  width: 2.1rem;
+  height: 2.1rem;
+  border-radius: 0.65rem;
+  background: linear-gradient(135deg, #f97316, var(--cor-marca-escura));
+  color: #fff;
+  font-size: 1.1rem;
+}
+
+.marca-sub {
+  font-weight: 500;
+  color: var(--cor-texto-suave);
+}
+
+.barra-topo .nav-link {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-weight: 500;
+  border-radius: var(--raio-pequeno);
+}
+
+.barra-topo .nav-link:hover {
+  background: var(--cor-neutra);
+}
+
+.barra-topo .nav-link.active {
+  background: var(--cor-marca-suave);
+}
+
+.cabecalho-pagina {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.cabecalho-pagina h1 {
+  font-size: 1.75rem;
+  font-weight: 700;
+  margin: 0;
+}
+
+.subtitulo {
+  color: var(--cor-texto-suave);
+  margin: 0.25rem 0 0;
+}
+
+.voltar {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  margin-bottom: 0.75rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--cor-texto-suave);
+  text-decoration: none;
+}
+
+.voltar:hover {
+  color: var(--cor-marca-escura);
+}
+
+.carregando {
+  display: flex;
+  justify-content: center;
+  padding: 4rem 0;
+  color: var(--cor-marca);
+}
+
+.vazio {
+  text-align: center;
+  padding: 2.5rem 1rem;
+  color: var(--cor-texto-suave);
+  background: var(--cor-superficie);
+  border: 1px dashed var(--cor-borda-forte);
+  border-radius: var(--raio);
+}
+
+.vazio .bi {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-size: 2rem;
+  color: var(--cor-marca-clara);
+}
+
+.vazio p {
+  margin: 0;
+}
+
+.titulo-card {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.titulo-card .bi {
+  color: var(--cor-marca);
+}
+
+.aviso-bloqueio {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin: 0;
+  padding: 0.75rem 1rem;
+  font-size: 0.9rem;
+  color: var(--cor-texto-medio);
+  background: var(--cor-neutra);
+  border-radius: var(--raio-pequeno);
+}
+
+.min-w-0 {
+  min-width: 0;
+}

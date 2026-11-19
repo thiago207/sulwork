@@ -1,0 +1,75 @@
+<section class="card mb-4" id="caixa-contribuicoes">
+  <div class="table-responsive">
+    <table class="table align-middle">
+      <thead>
+        <tr>
+          <th>Quem leva</th>
+          <th>Item</th>
+          <th class="text-end">Quantidade</th>
+          <th><span class="visually-hidden">Ações</span></th>
+        </tr>
+      </thead>
+      <tbody id="linhas-contribuicoes"></tbody>
+    </table>
+  </div>
+</section>
+
+<div class="vazio mb-4" id="sem-contribuicoes" hidden>
+  <i class="bi bi-basket"></i>
+  <p>Nenhuma contribuição ainda.</p>
+</div>
+
+<form id="form-contribuicao" class="card" novalidate>
+  <div class="card-body">
+    <h3 class="titulo-card"><i class="bi bi-plus-circle"></i> Nova contribuição</h3>
+    <div class="row g-3">
+      <div class="col-md-4">
+        <label class="form-label" for="contribuicao-participante">Quem vai levar</label>
+        <select class="form-select" id="contribuicao-participante" name="participanteId">
+          <option value="">Escolha...</option>
+        </select>
+        <div class="invalid-feedback" data-erro="participanteId"></div>
+      </div>
+      <div class="col-md-5">
+        <label class="form-label" for="contribuicao-item">Item</label>
+        <select class="form-select" id="contribuicao-item" name="itemId">
+          <option value="">Escolha...</option>
+        </select>
+        <div class="invalid-feedback" data-erro="itemId"></div>
+      </div>
+      <div class="col-md-3">
+        <label class="form-label" for="contribuicao-quantidade">Quantidade</label>
+        <input class="form-control" id="contribuicao-quantidade" name="quantidade" type="number" min="1">
+        <div class="invalid-feedback" data-erro="quantidade"></div>
+      </div>
+    </div>
+    <div class="d-flex justify-content-end mt-3">
+      <button class="btn btn-primary" type="submit"><i class="bi bi-check-lg"></i> Incluir contribuição</button>
+    </div>
+  </div>
+</form>
+
+<p class="aviso-bloqueio" id="contribuicoes-bloqueado" hidden>
+  <i class="bi bi-lock"></i> Contribuições só podem ser alteradas com o evento aberto e antes do prazo.
+</p>
+
+<template data-modelo="contribuicao">
+  <tr>
+    <td>
+      <div class="d-flex align-items-center gap-2">
+        <span class="avatar avatar-pequeno" data-campo="iniciais"></span>
+        <span class="fw-medium" data-campo="participante"></span>
+      </div>
+    </td>
+    <td>
+      <div data-campo="item"></div>
+      <ul class="avisos" data-campo="avisos"></ul>
+    </td>
+    <td class="text-end text-nowrap" data-campo="quantidade"></td>
+    <td class="text-end">
+      <button class="btn btn-sm btn-icone" type="button" data-acao="remover-contribuicao" title="Remover contribuição" aria-label="Remover contribuição">
+        <i class="bi bi-trash3"></i>
+      </button>
+    </td>
+  </tr>
+</template>

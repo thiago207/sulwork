@@ -1,0 +1,29 @@
+<section class="card mb-3" id="caixa-participantes">
+  <ul class="list-group list-group-flush" id="participantes-evento"></ul>
+</section>
+
+<div class="vazio mb-3" id="sem-participantes-evento" hidden>
+  <i class="bi bi-person-plus"></i>
+  <p>Ninguém no evento ainda.</p>
+</div>
+
+<form id="form-entrar" class="card" novalidate>
+  <div class="card-body">
+    <label class="form-label" for="entrar-participante">Adicionar participante ao evento</label>
+    <div class="d-flex flex-wrap gap-2">
+      <select class="form-select flex-grow-1 w-auto" id="entrar-participante" name="participanteId">
+        <option value="">Escolha um participante...</option>
+      </select>
+      <button class="btn btn-primary" type="submit"><i class="bi bi-person-plus"></i> Adicionar</button>
+    </div>
+  </div>
+</form>
+
+<p class="aviso-bloqueio" id="todos-no-evento" hidden>
+  <i class="bi bi-check2-all"></i> Todos os participantes cadastrados já estão no evento.
+  <a href="#/participantes" class="ms-1">Cadastrar mais</a>
+</p>
+
+<p class="aviso-bloqueio" id="participantes-bloqueado" hidden>
+  <i class="bi bi-lock"></i> Participantes só entram ou saem com o evento aberto e antes do prazo.
+</p>
