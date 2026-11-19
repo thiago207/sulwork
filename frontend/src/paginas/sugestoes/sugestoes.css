@@ -68,6 +68,11 @@
   color: #92400e;
 }
 
+/* display em classe própria: utilitários como d-block têm !important e venceriam o atributo hidden */
+.conflito-voce {
+  display: block;
+}
+
 .conflito.com-voce {
   background: #fee2e2;
   color: #991b1b;
