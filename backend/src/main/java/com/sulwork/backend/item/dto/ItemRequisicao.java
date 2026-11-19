@@ -19,7 +19,8 @@ public record ItemRequisicao(
         @Positive(message = "A quantidade necessária deve ser maior que zero.")
         Integer quantidadeNecessaria,
 
-        boolean obrigatorio,
+        // Boolean e não boolean: no Jackson 3 um primitivo ausente no JSON vira erro 400
+        Boolean obrigatorio,
 
         Set<Alergeno> alergenos) {
 }
