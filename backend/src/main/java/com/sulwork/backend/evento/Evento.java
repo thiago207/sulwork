@@ -81,6 +81,16 @@ public class Evento {
         this.status = destino;
     }
 
+    // regra 2: entrar, sair e mexer em contribuições só com ABERTO e antes do prazo
+    public void exigirAlteracoesAbertas(LocalDateTime agora) {
+        if (status != ABERTO) {
+            throw new RegraNegocioException("O evento precisa estar ABERTO para esta alteração. Status atual: " + status + ".");
+        }
+        if (!agora.isBefore(prazoAlteracoes)) {
+            throw new RegraNegocioException("O prazo de alterações do evento já venceu.");
+        }
+    }
+
     public void validarExclusao() {
         if (status != RASCUNHO) {
             throw new RegraNegocioException(
