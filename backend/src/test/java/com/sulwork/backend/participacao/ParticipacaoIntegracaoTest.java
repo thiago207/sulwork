@@ -13,10 +13,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import com.jayway.jsonpath.JsonPath;
 import com.sulwork.backend.TestcontainersConfiguration;
 import com.sulwork.backend.comum.config.RelogioConfig;
-import com.sulwork.backend.participante.cpf.CpfValidator;
+import com.sulwork.backend.participante.cpf.CpfsDeTeste;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
-import java.util.concurrent.ThreadLocalRandom;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -35,18 +34,6 @@ class ParticipacaoIntegracaoTest {
 
     @Autowired
     MockMvc mockMvc;
-
-    // o banco é compartilhado entre as classes de teste, então cada CPF precisa ser novo
-    static String cpfAleatorio() {
-        String base = String.format("%09d", ThreadLocalRandom.current().nextInt(1, 999_999_999));
-        for (int dv = 0; dv < 100; dv++) {
-            String cpf = base + String.format("%02d", dv);
-            if (CpfValidator.valido(cpf)) {
-                return cpf;
-            }
-        }
-        return cpfAleatorio();
-    }
 
     ResultActions postJson(String url, String corpo) throws Exception {
         return mockMvc.perform(post(url).contentType(MediaType.APPLICATION_JSON).content(corpo));
@@ -78,7 +65,7 @@ class ParticipacaoIntegracaoTest {
     @Test
     void entrarDuasVezesNoMesmoEventoRetorna409() throws Exception {
         long evento = criarEvento(true);
-        long participante = criarParticipante(cpfAleatorio());
+        long participante = criarParticipante(CpfsDeTeste.aleatorio());
 
         postJson("/api/eventos/" + evento + "/participantes/" + participante, "")
                 .andExpect(status().isCreated());
@@ -90,7 +77,7 @@ class ParticipacaoIntegracaoTest {
     @Test
     void sairEVoltarReativaAMesmaParticipacao() throws Exception {
         long evento = criarEvento(true);
-        long participante = criarParticipante(cpfAleatorio());
+        long participante = criarParticipante(CpfsDeTeste.aleatorio());
         String url = "/api/eventos/" + evento + "/participantes/" + participante;
         String lista = "/api/eventos/" + evento + "/participantes";
 
@@ -109,7 +96,7 @@ class ParticipacaoIntegracaoTest {
     @Test
     void entrarEmEventoRascunhoRetorna422() throws Exception {
         long evento = criarEvento(false);
-        long participante = criarParticipante(cpfAleatorio());
+        long participante = criarParticipante(CpfsDeTeste.aleatorio());
 
         postJson("/api/eventos/" + evento + "/participantes/" + participante, "")
                 .andExpect(status().isUnprocessableContent());
@@ -117,7 +104,7 @@ class ParticipacaoIntegracaoTest {
 
     @Test
     void cpfComMascaraEhSalvoSoComNumerosEDuplicadoRetorna409() throws Exception {
-        String cpf = cpfAleatorio();
+        String cpf = CpfsDeTeste.aleatorio();
         String mascarado = cpf.replaceFirst("(\\d{3})(\\d{3})(\\d{3})(\\d{2})", "$1.$2.$3-$4");
 
         postJson("/api/participantes", "{\"nome\": \"Bia\", \"cpf\": \"" + mascarado + "\"}")
@@ -138,7 +125,7 @@ class ParticipacaoIntegracaoTest {
     @Test
     void participanteExcluidoSaiDaListagemENaoEntraEmEvento() throws Exception {
         long evento = criarEvento(true);
-        long participante = criarParticipante(cpfAleatorio());
+        long participante = criarParticipante(CpfsDeTeste.aleatorio());
 
         mockMvc.perform(delete("/api/participantes/{id}", participante)).andExpect(status().isNoContent());
 
