@@ -4,6 +4,7 @@ import com.sulwork.backend.categoria.dto.CategoriaRequisicao;
 import com.sulwork.backend.categoria.dto.CategoriaResposta;
 import com.sulwork.backend.comum.erro.NaoEncontradoException;
 import com.sulwork.backend.comum.erro.RegraNegocioException;
+import com.sulwork.backend.contribuicao.ContribuicaoRepository;
 import com.sulwork.backend.evento.EventoService;
 import com.sulwork.backend.item.ItemRepository;
 import java.util.List;
@@ -18,6 +19,7 @@ public class CategoriaService {
     private final CategoriaRepository repository;
     private final ItemRepository itemRepository;
     private final EventoService eventoService;
+    private final ContribuicaoRepository contribuicaoRepository;
 
     @Transactional(readOnly = true)
     public List<CategoriaResposta> listar(Long eventoId) {
@@ -42,6 +44,9 @@ public class CategoriaService {
     public CategoriaResposta editar(Long eventoId, Long id, CategoriaRequisicao req) {
         eventoService.buscarEntidade(eventoId).exigirEdicaoPermitida();
         var categoria = buscarEntidade(eventoId, id);
+        if (req.unidade() != categoria.getUnidade() && contribuicaoRepository.somarAtivasDaCategoria(id) > 0) {
+            throw new RegraNegocioException("A categoria já tem contribuições e não pode trocar de unidade.");
+        }
         categoria.atualizar(req.nome(), req.meta(), req.unidade());
         return CategoriaMapper.paraResposta(categoria);
     }

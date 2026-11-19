@@ -3,6 +3,7 @@ package com.sulwork.backend.item;
 import com.sulwork.backend.categoria.CategoriaService;
 import com.sulwork.backend.comum.erro.NaoEncontradoException;
 import com.sulwork.backend.comum.erro.RegraNegocioException;
+import com.sulwork.backend.contribuicao.ContribuicaoRepository;
 import com.sulwork.backend.evento.EventoService;
 import com.sulwork.backend.item.dto.ItemRequisicao;
 import com.sulwork.backend.item.dto.ItemResposta;
@@ -18,6 +19,7 @@ public class ItemService {
     private final ItemRepository repository;
     private final CategoriaService categoriaService;
     private final EventoService eventoService;
+    private final ContribuicaoRepository contribuicaoRepository;
 
     @Transactional(readOnly = true)
     public List<ItemResposta> listar(Long eventoId) {
@@ -34,24 +36,25 @@ public class ItemService {
     public ItemResposta criar(Long eventoId, ItemRequisicao req) {
         eventoService.buscarEntidade(eventoId).exigirEdicaoPermitida();
         var categoria = categoriaService.buscarEntidade(eventoId, req.categoriaId());
-        var item = new Item(categoria, req.nome(), req.quantidadeNecessaria(), req.obrigatorio(), req.alergenos());
+        var item = new Item(categoria, req.nome(), req.quantidadeNecessaria(), Boolean.TRUE.equals(req.obrigatorio()),
+                req.alergenos());
         return ItemMapper.paraResposta(repository.save(item));
     }
 
     @Transactional
     public ItemResposta editar(Long eventoId, Long id, ItemRequisicao req) {
         eventoService.buscarEntidade(eventoId).exigirEdicaoPermitida();
-        var item = buscarEntidade(eventoId, id);
+        var item = travar(eventoId, id);
         var categoria = categoriaService.buscarEntidade(eventoId, req.categoriaId());
-        item.atualizar(categoria, req.nome(), req.quantidadeNecessaria(), req.obrigatorio(), req.alergenos(),
-                totalContribuido(item));
+        item.atualizar(categoria, req.nome(), req.quantidadeNecessaria(), Boolean.TRUE.equals(req.obrigatorio()),
+                req.alergenos(), totalContribuido(item));
         return ItemMapper.paraResposta(item);
     }
 
     @Transactional
     public void excluir(Long eventoId, Long id) {
         eventoService.buscarEntidade(eventoId).exigirEdicaoPermitida();
-        var item = buscarEntidade(eventoId, id);
+        var item = travar(eventoId, id);
         if (totalContribuido(item) > 0) {
             throw new RegraNegocioException("Não é possível excluir um item que já recebeu contribuições.");
         }
@@ -63,8 +66,13 @@ public class ItemService {
                 .orElseThrow(() -> new NaoEncontradoException("Item " + id + " não encontrado neste evento."));
     }
 
-    // etapa 5: somar as contribuições ativas do item
-    int totalContribuido(Item item) {
-        return 0;
+    // com lock: ninguém contribui no item enquanto a quantidade necessária muda (regras 7 e 8)
+    private Item travar(Long eventoId, Long id) {
+        return repository.findByIdAndEventoComLock(id, eventoId)
+                .orElseThrow(() -> new NaoEncontradoException("Item " + id + " não encontrado neste evento."));
+    }
+
+    private int totalContribuido(Item item) {
+        return Math.toIntExact(contribuicaoRepository.somarAtivasDoItem(item.getId()));
     }
 }

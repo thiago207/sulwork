@@ -54,6 +54,10 @@ public class Item {
             throw new RegraNegocioException("A quantidade necessária não pode ser menor que o total já contribuído ("
                     + totalContribuido + ").");
         }
+        // as contribuições foram feitas na unidade antiga
+        if (totalContribuido > 0 && categoria.getUnidade() != getUnidade()) {
+            throw new RegraNegocioException("O item já tem contribuições e não pode ir para uma categoria de outra unidade.");
+        }
         this.categoria = categoria;
         this.nome = nome;
         this.quantidadeNecessaria = quantidadeNecessaria;
