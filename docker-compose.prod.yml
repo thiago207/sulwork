@@ -1,0 +1,30 @@
+services:
+  banco:
+    ports: !reset []
+    restart: unless-stopped
+  backend:
+    ports: !reset []
+    restart: unless-stopped
+  frontend:
+    ports: !reset []
+    restart: unless-stopped
+  caddy:
+    image: caddy:2-alpine
+    container_name: sulwork-caddy
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    environment:
+      FRONT_DOMINIO: ${FRONT_DOMINIO}
+      API_DOMINIO: ${API_DOMINIO}
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      - frontend
+      - backend
+volumes:
+  caddy_data:
+  caddy_config:
