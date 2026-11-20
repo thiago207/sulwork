@@ -6,6 +6,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 
 public interface ParticipacaoRepository extends JpaRepository<Participacao, Long> {
@@ -23,4 +24,8 @@ public interface ParticipacaoRepository extends JpaRepository<Participacao, Long
             where p.participante.id = :participanteId and p.ativo = true and p.evento.status in :status
             order by p.evento.dataHora""")
     List<String> findNomesDosEventos(Long participanteId, Collection<StatusEvento> status);
+
+    @Modifying
+    @Query("update Participacao p set p.ativo = false where p.participante.id = :participanteId and p.ativo = true")
+    int desativarDoParticipante(Long participanteId);
 }

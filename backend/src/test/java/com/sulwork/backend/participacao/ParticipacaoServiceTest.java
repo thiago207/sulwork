@@ -63,8 +63,8 @@ class ParticipacaoServiceTest {
     }
 
     void prepararBuscas() {
-        when(eventoService.buscarEntidade(1L)).thenReturn(evento);
-        when(participanteService.buscarEntidade(2L)).thenReturn(participante);
+        when(eventoService.travarParaAlteracao(1L)).thenReturn(evento);
+        when(participanteService.travarAtivo(2L)).thenReturn(participante);
     }
 
     @Test
@@ -129,7 +129,7 @@ class ParticipacaoServiceTest {
     @Test
     void sairDesativaAParticipacaoEAsContribuicoes() {
         eventoAberto();
-        when(eventoService.buscarEntidade(1L)).thenReturn(evento);
+        when(eventoService.travarParaAlteracao(1L)).thenReturn(evento);
         var participacao = new Participacao(evento, participante);
         ReflectionTestUtils.setField(participacao, "id", 5L);
         when(repository.findByEventoIdAndParticipanteId(1L, 2L)).thenReturn(Optional.of(participacao));
@@ -144,7 +144,7 @@ class ParticipacaoServiceTest {
     @Test
     void sairSemEstarNoEventoRetornaNaoEncontrado() {
         eventoAberto();
-        when(eventoService.buscarEntidade(1L)).thenReturn(evento);
+        when(eventoService.travarParaAlteracao(1L)).thenReturn(evento);
         var jaSaiu = new Participacao(evento, participante);
         jaSaiu.sair();
         when(repository.findByEventoIdAndParticipanteId(1L, 2L)).thenReturn(Optional.of(jaSaiu));
@@ -158,7 +158,7 @@ class ParticipacaoServiceTest {
     void sairComEventoEncerradoEhBloqueado() {
         eventoAberto();
         evento.mudarStatus(StatusEvento.ENCERRADO, AGORA);
-        when(eventoService.buscarEntidade(1L)).thenReturn(evento);
+        when(eventoService.travarParaAlteracao(1L)).thenReturn(evento);
 
         assertThatThrownBy(() -> serviceEm(AGORA).sair(1L, 2L))
                 .isInstanceOf(RegraNegocioException.class)
@@ -168,7 +168,7 @@ class ParticipacaoServiceTest {
     @Test
     void sairComPrazoVencidoEhBloqueado() {
         eventoAberto();
-        when(eventoService.buscarEntidade(1L)).thenReturn(evento);
+        when(eventoService.travarParaAlteracao(1L)).thenReturn(evento);
 
         assertThatThrownBy(() -> serviceEm(PRAZO).sair(1L, 2L))
                 .isInstanceOf(RegraNegocioException.class)

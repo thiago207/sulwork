@@ -3,6 +3,7 @@ package com.sulwork.backend.participante;
 import com.sulwork.backend.comum.erro.ConflitoException;
 import com.sulwork.backend.comum.erro.NaoEncontradoException;
 import com.sulwork.backend.comum.erro.RegraNegocioException;
+import com.sulwork.backend.contribuicao.ContribuicaoRepository;
 import com.sulwork.backend.evento.StatusEvento;
 import com.sulwork.backend.participacao.ParticipacaoRepository;
 import com.sulwork.backend.participante.cpf.CpfValidator;
@@ -23,11 +24,12 @@ public class ParticipanteService {
 
     private final ParticipanteRepository repository;
     private final ParticipacaoRepository participacaoRepository;
+    private final ContribuicaoRepository contribuicaoRepository;
 
     @Transactional
     public ParticipanteResposta criar(ParticipanteRequisicao req) {
         String cpf = CpfValidator.somenteNumeros(req.cpf());
-        var existente = repository.findByCpf(cpf);
+        var existente = repository.findByCpfComLock(cpf);
         if (existente.isPresent()) {
             var participante = existente.get();
             if (participante.isAtivo()) {
@@ -52,7 +54,7 @@ public class ParticipanteService {
 
     @Transactional
     public ParticipanteResposta editar(Long id, ParticipanteEdicaoRequisicao req) {
-        var participante = buscarEntidade(id);
+        var participante = travarAtivo(id);
         String cpf = req.cpf() == null || req.cpf().isBlank()
                 ? participante.getCpf()
                 : CpfValidator.somenteNumeros(req.cpf());
@@ -64,13 +66,20 @@ public class ParticipanteService {
     // sair do evento respeita o prazo (regra 2), então quem está num evento em andamento sai antes
     @Transactional
     public void excluir(Long id) {
-        var participante = buscarEntidade(id);
+        var participante = travarAtivo(id);
         var eventos = participacaoRepository.findNomesDosEventos(id, EM_ANDAMENTO);
         if (!eventos.isEmpty()) {
             throw new RegraNegocioException("O participante está no evento \"" + eventos.getFirst()
                     + "\", que ainda não terminou. Tire-o do evento antes de excluir.");
         }
+        contribuicaoRepository.desativarDoParticipante(id);
+        participacaoRepository.desativarDoParticipante(id);
         participante.desativar();
+    }
+
+    public Participante travarAtivo(Long id) {
+        return repository.findAtivoComLock(id)
+                .orElseThrow(() -> new NaoEncontradoException("Participante " + id + " não encontrado."));
     }
 
     public Participante buscarEntidade(Long id) {

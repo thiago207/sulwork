@@ -21,7 +21,7 @@
 
 <form id="form-contribuicao" class="card" novalidate>
   <div class="card-body">
-    <h3 class="titulo-card"><i class="bi bi-plus-circle"></i> Nova contribuição</h3>
+    <h3 class="titulo-card">Nova contribuição</h3>
     <div class="row g-3">
       <div class="col-md-4">
         <label class="form-label" for="contribuicao-participante">Quem vai levar</label>
@@ -43,8 +43,9 @@
         <div class="invalid-feedback" data-erro="quantidade"></div>
       </div>
     </div>
-    <div class="d-flex justify-content-end mt-3">
-      <button class="btn btn-primary" type="submit"><i class="bi bi-check-lg"></i> Incluir contribuição</button>
+    <div class="d-flex justify-content-end gap-2 mt-3">
+      <button class="btn btn-link" type="button" data-cancelar hidden>Cancelar edição</button>
+      <button class="btn btn-primary" type="submit">Incluir contribuição</button>
     </div>
   </div>
 </form>
@@ -66,7 +67,10 @@
       <ul class="avisos" data-campo="avisos"></ul>
     </td>
     <td class="text-end text-nowrap" data-campo="quantidade"></td>
-    <td class="text-end">
+    <td class="text-end text-nowrap" data-campo="acoes">
+      <button class="btn btn-sm btn-icone btn-icone-neutro" type="button" data-acao="editar-contribuicao" title="Editar contribuição" aria-label="Editar contribuição">
+        <i class="bi bi-pencil"></i>
+      </button>
       <button class="btn btn-sm btn-icone" type="button" data-acao="remover-contribuicao" title="Remover contribuição" aria-label="Remover contribuição">
         <i class="bi bi-trash3"></i>
       </button>

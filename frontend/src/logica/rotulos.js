@@ -1,3 +1,5 @@
+import { dataParaCalendario } from './datas.js';
+
 export const TIPOS = {
   CAFE_DA_MANHA: 'Café da manhã',
   ALMOCO: 'Almoço',
@@ -81,17 +83,17 @@ export function iconeDoTipo(tipo) {
 
 export function formatarDataHora(iso) {
   if (!iso) return '';
-  return new Date(iso).toLocaleString('pt-BR', { dateStyle: 'short', timeStyle: 'short' });
+  return dataParaCalendario(iso).toLocaleString('pt-BR', { dateStyle: 'short', timeStyle: 'short', timeZone: 'UTC' });
 }
 
 // para o bloquinho de calendário dos cards: "18" "dez" e a linha "sex, 08:00"
 export function partesDaData(iso) {
-  const data = new Date(iso);
+  const data = dataParaCalendario(iso);
   return {
-    dia: String(data.getDate()).padStart(2, '0'),
-    mes: data.toLocaleString('pt-BR', { month: 'short' }).replace('.', ''),
-    semana: data.toLocaleString('pt-BR', { weekday: 'short' }).replace('.', ''),
-    hora: data.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }),
+    dia: String(data.getUTCDate()).padStart(2, '0'),
+    mes: data.toLocaleString('pt-BR', { month: 'short', timeZone: 'UTC' }).replace('.', ''),
+    semana: data.toLocaleString('pt-BR', { weekday: 'short', timeZone: 'UTC' }).replace('.', ''),
+    hora: data.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit', timeZone: 'UTC' }),
   };
 }
 

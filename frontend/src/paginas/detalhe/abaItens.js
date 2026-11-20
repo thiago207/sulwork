@@ -16,10 +16,8 @@ function criarItem(aba, item, editavel) {
   });
   campo(linha, 'obrigatorio').hidden = !item.obrigatorio;
   criarChips(campo(linha, 'alergenos'), item.alergenos, ALERGENOS, 'chip-alergeno');
-  const remover = linha.querySelector('[data-acao]');
-  remover.dataset.id = item.id;
-  remover.dataset.nome = item.nome;
-  remover.hidden = !editavel;
+  if (!editavel) campo(linha, 'acoes').remove();
+  else campo(linha, 'acoes').dataset.id = item.id;
   return linha;
 }
 
@@ -36,10 +34,8 @@ function criarCategoria(aba, categoria, itens, editavel) {
   campo(cartao, 'alerta').hidden = !itens.length || pedido >= categoria.meta;
   campo(cartao, 'itens').replaceChildren(...itens.map((i) => criarItem(aba, i, editavel)));
   campo(cartao, 'vazia').hidden = itens.length > 0;
-  const remover = cartao.querySelector('[data-acao]');
-  remover.dataset.id = categoria.id;
-  remover.dataset.nome = categoria.nome;
-  remover.hidden = !editavel;
+  if (!editavel) campo(cartao, 'acoes').remove();
+  else campo(cartao, 'acoes').dataset.id = categoria.id;
   return cartao;
 }
 
@@ -65,6 +61,8 @@ export function desenharItens(aba, { categorias, itens, editavel }, { id, execut
 
   const formCategoria = aba.querySelector('#form-categoria');
   const formItem = aba.querySelector('#form-item');
+  let categoriaEmEdicao;
+  let itemEmEdicao;
   preencherSelect(formCategoria.elements.unidade, Object.entries(UNIDADES));
   preencherSelect(formItem.elements.categoriaId, categorias.map((c) => [c.id, c.nome]));
   criarOpcoesChip(aba.querySelector('#opcoes-alergenos'), 'alergenos', ALERGENOS);
@@ -78,41 +76,90 @@ export function desenharItens(aba, { categorias, itens, editavel }, { id, execut
   formItem.elements.categoriaId.addEventListener('change', mostrarUnidade);
   mostrarUnidade();
 
+  const modoEdicaoCategoria = (categoria) => {
+    categoriaEmEdicao = categoria;
+    formCategoria.reset();
+    marcarErros(formCategoria, {});
+    formCategoria.querySelector('h3').textContent = categoria ? 'Editar categoria' : 'Nova categoria';
+    formCategoria.querySelector('[type="submit"]').textContent = categoria ? 'Salvar categoria' : 'Adicionar categoria';
+    formCategoria.querySelector('[data-cancelar]').hidden = !categoria;
+    if (categoria) {
+      formCategoria.elements.nome.value = categoria.nome;
+      formCategoria.elements.meta.value = categoria.meta;
+      formCategoria.elements.unidade.value = categoria.unidade;
+      formCategoria.elements.nome.focus();
+    }
+  };
+
+  const modoEdicaoItem = (item) => {
+    itemEmEdicao = item;
+    formItem.reset();
+    marcarErros(formItem, {});
+    formItem.querySelector('h3').textContent = item ? 'Editar item' : 'Novo item';
+    formItem.querySelector('[type="submit"]').textContent = item ? 'Salvar item' : 'Adicionar item';
+    formItem.querySelector('[data-cancelar]').hidden = !item;
+    if (item) {
+      formItem.elements.nome.value = item.nome;
+      formItem.elements.categoriaId.value = item.categoriaId;
+      formItem.elements.quantidadeNecessaria.value = item.quantidadeNecessaria;
+      formItem.elements.obrigatorio.checked = item.obrigatorio;
+      formItem.querySelectorAll('input[name="alergenos"]').forEach((campo) => {
+        campo.checked = item.alergenos.includes(campo.value);
+      });
+      formItem.elements.nome.focus();
+    }
+    mostrarUnidade();
+  };
+  formCategoria.querySelector('[data-cancelar]').addEventListener('click', () => modoEdicaoCategoria());
+  formItem.querySelector('[data-cancelar]').addEventListener('click', () => modoEdicaoItem());
+
   formCategoria.addEventListener('submit', (e) => {
     e.preventDefault();
     if (!validarNumeros(formCategoria, ['meta'])) return;
     const dados = new FormData(formCategoria);
-    executar(() => api.criarCategoria(id, {
+    const requisicao = {
       nome: dados.get('nome'),
       meta: paraNumero(dados.get('meta')),
       unidade: dados.get('unidade'),
-    }), formCategoria);
+    };
+    executar(() => categoriaEmEdicao
+      ? api.editarCategoria(id, categoriaEmEdicao.id, requisicao)
+      : api.criarCategoria(id, requisicao), formCategoria);
   });
 
   formItem.addEventListener('submit', (e) => {
     e.preventDefault();
     if (!validarNumeros(formItem, ['quantidadeNecessaria'])) return;
     const dados = new FormData(formItem);
-    executar(() => api.criarItem(id, {
+    const requisicao = {
       nome: dados.get('nome'),
       categoriaId: Number(dados.get('categoriaId')),
       quantidadeNecessaria: paraNumero(dados.get('quantidadeNecessaria')),
       obrigatorio: dados.has('obrigatorio'),
       alergenos: dados.getAll('alergenos'),
-    }), formItem);
+    };
+    executar(() => itemEmEdicao
+      ? api.editarItem(id, itemEmEdicao.id, requisicao)
+      : api.criarItem(id, requisicao), formItem);
   });
 
   aba.querySelector('#categorias').addEventListener('click', async (e) => {
     const botao = e.target.closest('[data-acao]');
     if (!botao) return;
-    const { acao, id: alvo, nome } = botao.dataset;
-    if (acao === 'excluir-categoria'
-        && await confirmar({ titulo: `Remover a categoria "${nome}"?`, texto: 'Ela precisa estar sem itens.', botao: 'Remover' })) {
-      executar(() => api.excluirCategoria(id, alvo));
-    }
-    if (acao === 'excluir-item'
-        && await confirmar({ titulo: `Remover o item "${nome}"?`, botao: 'Remover' })) {
-      executar(() => api.excluirItem(id, alvo));
+    const alvo = botao.closest('[data-id]').dataset.id;
+    const { acao } = botao.dataset;
+    if (acao.endsWith('-categoria')) {
+      const categoria = categorias.find((c) => String(c.id) === alvo);
+      if (acao === 'editar-categoria') modoEdicaoCategoria(categoria);
+      else if (await confirmar({ titulo: `Remover a categoria "${categoria.nome}"?`, texto: 'Ela precisa estar sem itens.', botao: 'Remover' })) {
+        executar(() => api.excluirCategoria(id, alvo));
+      }
+    } else {
+      const item = itens.find((i) => String(i.id) === alvo);
+      if (acao === 'editar-item') modoEdicaoItem(item);
+      else if (await confirmar({ titulo: `Remover o item "${item.nome}"?`, botao: 'Remover' })) {
+        executar(() => api.excluirItem(id, alvo));
+      }
     }
   });
 }

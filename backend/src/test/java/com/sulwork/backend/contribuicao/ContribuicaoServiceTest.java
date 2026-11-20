@@ -77,7 +77,7 @@ class ContribuicaoServiceTest {
     }
 
     void prepararCriacao(long jaContribuido) {
-        when(eventoService.buscarEntidade(1L)).thenReturn(evento);
+        when(eventoService.travarParaAlteracao(1L)).thenReturn(evento);
         when(participacaoRepository.findByEventoIdAndParticipanteId(1L, 2L)).thenReturn(Optional.of(participacao));
         when(itemRepository.findByIdAndEventoComLock(9L, 1L)).thenReturn(Optional.of(item));
         when(repository.somarAtivasDoItem(9L)).thenReturn(jaContribuido);
@@ -107,7 +107,7 @@ class ContribuicaoServiceTest {
 
     @Test
     void foraDoPrazoEhBloqueado() {
-        when(eventoService.buscarEntidade(1L)).thenReturn(evento);
+        when(eventoService.travarParaAlteracao(1L)).thenReturn(evento);
 
         assertThatThrownBy(() -> serviceEm(PRAZO).criar(1L, REQ))
                 .isInstanceOf(RegraNegocioException.class)
@@ -118,7 +118,7 @@ class ContribuicaoServiceTest {
     @ParameterizedTest
     @EnumSource(value = StatusEvento.class, names = "ABERTO", mode = EnumSource.Mode.EXCLUDE)
     void eventoNaoAbertoEhBloqueado(StatusEvento status) {
-        when(eventoService.buscarEntidade(1L)).thenReturn(eventoEm(status));
+        when(eventoService.travarParaAlteracao(1L)).thenReturn(eventoEm(status));
 
         assertThatThrownBy(() -> serviceEm(AGORA).criar(1L, REQ))
                 .isInstanceOf(RegraNegocioException.class)
@@ -129,7 +129,7 @@ class ContribuicaoServiceTest {
     @Test
     void participacaoInativaEhBloqueada() {
         participacao.sair();
-        when(eventoService.buscarEntidade(1L)).thenReturn(evento);
+        when(eventoService.travarParaAlteracao(1L)).thenReturn(evento);
         when(participacaoRepository.findByEventoIdAndParticipanteId(1L, 2L)).thenReturn(Optional.of(participacao));
 
         assertThatThrownBy(() -> serviceEm(AGORA).criar(1L, REQ))
@@ -140,7 +140,7 @@ class ContribuicaoServiceTest {
 
     @Test
     void semParticipacaoEhBloqueado() {
-        when(eventoService.buscarEntidade(1L)).thenReturn(evento);
+        when(eventoService.travarParaAlteracao(1L)).thenReturn(evento);
         when(participacaoRepository.findByEventoIdAndParticipanteId(1L, 2L)).thenReturn(Optional.empty());
 
         assertThatThrownBy(() -> serviceEm(AGORA).criar(1L, REQ)).isInstanceOf(RegraNegocioException.class);
@@ -148,7 +148,7 @@ class ContribuicaoServiceTest {
 
     @Test
     void segundaContribuicaoAtivaNoMesmoItemEhConflito() {
-        when(eventoService.buscarEntidade(1L)).thenReturn(evento);
+        when(eventoService.travarParaAlteracao(1L)).thenReturn(evento);
         when(participacaoRepository.findByEventoIdAndParticipanteId(1L, 2L)).thenReturn(Optional.of(participacao));
         when(itemRepository.findByIdAndEventoComLock(9L, 1L)).thenReturn(Optional.of(item));
         when(repository.existsByParticipacaoIdAndItemIdAndAtivoTrue(5L, 9L)).thenReturn(true);
@@ -172,7 +172,7 @@ class ContribuicaoServiceTest {
     @Test
     void alterarSomaAsOutrasContribuicoesEANovaQuantidade() {
         var contribuicao = new Contribuicao(participacao, item, 2);
-        when(eventoService.buscarEntidade(1L)).thenReturn(evento);
+        when(eventoService.travarParaAlteracao(1L)).thenReturn(evento);
         when(repository.findAtivaNoEvento(30L, 1L)).thenReturn(Optional.of(contribuicao));
         when(itemRepository.findByIdAndEventoComLock(9L, 1L)).thenReturn(Optional.of(item));
         when(repository.somarOutrasAtivasDoItem(9L, 30L)).thenReturn(7L);
@@ -188,7 +188,7 @@ class ContribuicaoServiceTest {
     @Test
     void removerEhExclusaoLogica() {
         var contribuicao = new Contribuicao(participacao, item, 2);
-        when(eventoService.buscarEntidade(1L)).thenReturn(evento);
+        when(eventoService.travarParaAlteracao(1L)).thenReturn(evento);
         when(repository.findAtivaNoEvento(30L, 1L)).thenReturn(Optional.of(contribuicao));
 
         serviceEm(AGORA).remover(1L, 30L);
@@ -199,7 +199,7 @@ class ContribuicaoServiceTest {
 
     @Test
     void removerForaDoPrazoEhBloqueado() {
-        when(eventoService.buscarEntidade(1L)).thenReturn(evento);
+        when(eventoService.travarParaAlteracao(1L)).thenReturn(evento);
 
         assertThatThrownBy(() -> serviceEm(PRAZO.plusHours(1)).remover(1L, 30L))
                 .isInstanceOf(RegraNegocioException.class);

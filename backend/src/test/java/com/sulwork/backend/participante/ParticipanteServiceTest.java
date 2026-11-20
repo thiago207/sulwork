@@ -10,6 +10,7 @@ import static org.mockito.Mockito.when;
 import com.sulwork.backend.comum.erro.ConflitoException;
 import com.sulwork.backend.comum.erro.NaoEncontradoException;
 import com.sulwork.backend.comum.erro.RegraNegocioException;
+import com.sulwork.backend.contribuicao.ContribuicaoRepository;
 import com.sulwork.backend.participacao.ParticipacaoRepository;
 import com.sulwork.backend.participante.dto.ParticipanteEdicaoRequisicao;
 import com.sulwork.backend.participante.dto.ParticipanteRequisicao;
@@ -30,12 +31,14 @@ class ParticipanteServiceTest {
     ParticipanteRepository repository;
     @Mock
     ParticipacaoRepository participacaoRepository;
+    @Mock
+    ContribuicaoRepository contribuicaoRepository;
 
     ParticipanteService service;
 
     @BeforeEach
     void configurar() {
-        service = new ParticipanteService(repository, participacaoRepository);
+        service = new ParticipanteService(repository, participacaoRepository, contribuicaoRepository);
     }
 
     static Participante participante(long id, String cpf) {
@@ -46,7 +49,7 @@ class ParticipanteServiceTest {
 
     @Test
     void criarSalvaCpfSomenteComNumeros() {
-        when(repository.findByCpf("52998224725")).thenReturn(Optional.empty());
+        when(repository.findByCpfComLock("52998224725")).thenReturn(Optional.empty());
         when(repository.save(any(Participante.class))).thenAnswer(inv -> inv.getArgument(0));
         var req = new ParticipanteRequisicao("Ana", "529.982.247-25", Set.of(RestricaoAlimentar.SEM_GLUTEN), "celíaca");
 
@@ -59,7 +62,7 @@ class ParticipanteServiceTest {
 
     @Test
     void criarSemRestricoesDevolveListaVazia() {
-        when(repository.findByCpf(any())).thenReturn(Optional.empty());
+        when(repository.findByCpfComLock(any())).thenReturn(Optional.empty());
         when(repository.save(any(Participante.class))).thenAnswer(inv -> inv.getArgument(0));
 
         var resposta = service.criar(new ParticipanteRequisicao("Ana", "52998224725", null, null));
@@ -69,7 +72,7 @@ class ParticipanteServiceTest {
 
     @Test
     void criarComCpfDeParticipanteAtivoRetornaConflito() {
-        when(repository.findByCpf("52998224725")).thenReturn(Optional.of(participante(1, "52998224725")));
+        when(repository.findByCpfComLock("52998224725")).thenReturn(Optional.of(participante(1, "52998224725")));
 
         assertThatThrownBy(() -> service.criar(new ParticipanteRequisicao("Bia", "52998224725", null, null)))
                 .isInstanceOf(ConflitoException.class)
@@ -81,7 +84,7 @@ class ParticipanteServiceTest {
     void criarComCpfDeParticipanteExcluidoReativaComOsDadosNovos() {
         var inativo = participante(1, "52998224725");
         inativo.desativar();
-        when(repository.findByCpf("52998224725")).thenReturn(Optional.of(inativo));
+        when(repository.findByCpfComLock("52998224725")).thenReturn(Optional.of(inativo));
 
         var resposta = service.criar(new ParticipanteRequisicao("Bia", "529.982.247-25", Set.of(RestricaoAlimentar.SEM_MEL), null));
 
@@ -95,7 +98,7 @@ class ParticipanteServiceTest {
     @Test
     void editarMantendoOProprioCpfNaoEhConflito() {
         var ana = participante(1, "52998224725");
-        when(repository.findByIdAndAtivoTrue(1L)).thenReturn(Optional.of(ana));
+        when(repository.findAtivoComLock(1L)).thenReturn(Optional.of(ana));
         when(repository.findByCpf("52998224725")).thenReturn(Optional.of(ana));
 
         var resposta = service.editar(1L, new ParticipanteEdicaoRequisicao("Ana Maria", "52998224725", Set.of(), null));
@@ -106,7 +109,7 @@ class ParticipanteServiceTest {
 
     @Test
     void editarParaCpfDeOutroParticipanteRetornaConflito() {
-        when(repository.findByIdAndAtivoTrue(1L)).thenReturn(Optional.of(participante(1, "52998224725")));
+        when(repository.findAtivoComLock(1L)).thenReturn(Optional.of(participante(1, "52998224725")));
         when(repository.findByCpf("11144477735")).thenReturn(Optional.of(participante(2, "11144477735")));
 
         assertThatThrownBy(() -> service.editar(1L, new ParticipanteEdicaoRequisicao("Ana", "11144477735", null, null)))
@@ -116,7 +119,7 @@ class ParticipanteServiceTest {
     @Test
     void excluirDesativaSemApagar() {
         var ana = participante(1, "52998224725");
-        when(repository.findByIdAndAtivoTrue(1L)).thenReturn(Optional.of(ana));
+        when(repository.findAtivoComLock(1L)).thenReturn(Optional.of(ana));
 
         service.excluir(1L);
 
@@ -127,7 +130,7 @@ class ParticipanteServiceTest {
     @Test
     void editarSemCpfMantemOAtual() {
         var ana = participante(1, "52998224725");
-        when(repository.findByIdAndAtivoTrue(1L)).thenReturn(Optional.of(ana));
+        when(repository.findAtivoComLock(1L)).thenReturn(Optional.of(ana));
         when(repository.findByCpf("52998224725")).thenReturn(Optional.of(ana));
 
         service.editar(1L, new ParticipanteEdicaoRequisicao("Ana Paula", null, null, null));
@@ -139,7 +142,7 @@ class ParticipanteServiceTest {
     @Test
     void excluirQuemEstaEmEventoEmAndamentoEhBloqueado() {
         var ana = participante(1, "52998224725");
-        when(repository.findByIdAndAtivoTrue(1L)).thenReturn(Optional.of(ana));
+        when(repository.findAtivoComLock(1L)).thenReturn(Optional.of(ana));
         when(participacaoRepository.findNomesDosEventos(any(), any())).thenReturn(List.of("Café de fim de ano"));
 
         assertThatThrownBy(() -> service.excluir(1L))

@@ -67,7 +67,7 @@ public interface ContribuicaoRepository extends JpaRepository<Contribuicao, Long
     @Query("""
             select c from Contribuicao c
             join fetch c.participacao p join fetch p.participante
-            where c.id = :id and p.evento.id = :eventoId and c.ativo = true""")
+            where c.id = :id and p.evento.id = :eventoId and c.ativo = true and p.ativo = true""")
     Optional<Contribuicao> findAtivaNoEvento(Long id, Long eventoId);
 
     @Query("""
@@ -89,4 +89,8 @@ public interface ContribuicaoRepository extends JpaRepository<Contribuicao, Long
     @Modifying
     @Query("update Contribuicao c set c.ativo = false where c.participacao.id = :participacaoId and c.ativo = true")
     int desativarDaParticipacao(Long participacaoId);
+
+    @Modifying
+    @Query("update Contribuicao c set c.ativo = false where c.participacao.participante.id = :participanteId and c.ativo = true")
+    int desativarDoParticipante(Long participanteId);
 }

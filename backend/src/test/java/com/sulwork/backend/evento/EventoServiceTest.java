@@ -91,7 +91,7 @@ class EventoServiceTest {
     @Test
     void excluirEmRascunhoRemove() {
         var evento = eventoEmRascunho();
-        when(repository.findById(1L)).thenReturn(Optional.of(evento));
+        when(repository.findByIdComLock(1L)).thenReturn(Optional.of(evento));
 
         service.excluir(1L);
 
@@ -102,7 +102,7 @@ class EventoServiceTest {
     void excluirForaDeRascunhoNaoRemove() {
         var evento = eventoEmRascunho();
         evento.mudarStatus(StatusEvento.ABERTO, AGORA);
-        when(repository.findById(1L)).thenReturn(Optional.of(evento));
+        when(repository.findByIdComLock(1L)).thenReturn(Optional.of(evento));
 
         assertThatThrownBy(() -> service.excluir(1L)).isInstanceOf(RegraNegocioException.class);
         verify(repository, never()).delete(any());
@@ -111,7 +111,7 @@ class EventoServiceTest {
     @Test
     void mudarStatusAlteraAEntidadeSemChamarSave() {
         var evento = eventoEmRascunho();
-        when(repository.findById(1L)).thenReturn(Optional.of(evento));
+        when(repository.findByIdComLock(1L)).thenReturn(Optional.of(evento));
         when(itemRepository.existsByCategoriaEventoId(1L)).thenReturn(true);
 
         var resposta = service.mudarStatus(1L, StatusEvento.ABERTO);
@@ -123,7 +123,7 @@ class EventoServiceTest {
     @Test
     void abrirEventoSemItensEhBloqueado() {
         var evento = eventoEmRascunho();
-        when(repository.findById(1L)).thenReturn(Optional.of(evento));
+        when(repository.findByIdComLock(1L)).thenReturn(Optional.of(evento));
         when(itemRepository.existsByCategoriaEventoId(1L)).thenReturn(false);
 
         assertThatThrownBy(() -> service.mudarStatus(1L, StatusEvento.ABERTO))
@@ -134,7 +134,7 @@ class EventoServiceTest {
 
     @Test
     void editarAplicaNovosDados() {
-        when(repository.findById(1L)).thenReturn(Optional.of(eventoEmRascunho()));
+        when(repository.findByIdComLock(1L)).thenReturn(Optional.of(eventoEmRascunho()));
         var req = new EventoRequisicao("Almoço", null, TipoEvento.ALMOCO, AGORA.plusDays(20), AGORA.plusDays(15));
 
         var resposta = service.editar(1L, req);

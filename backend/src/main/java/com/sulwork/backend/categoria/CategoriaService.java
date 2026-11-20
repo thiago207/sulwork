@@ -37,7 +37,7 @@ public class CategoriaService {
 
     @Transactional
     public CategoriaResposta criar(Long eventoId, CategoriaRequisicao req) {
-        var evento = eventoService.buscarEntidade(eventoId);
+        var evento = eventoService.travarParaAlteracao(eventoId);
         evento.exigirEdicaoPermitida();
         exigirNomeLivre(eventoId, req.nome(), null);
         var categoria = new Categoria(evento, req.nome(), req.meta(), req.unidade());
@@ -46,7 +46,7 @@ public class CategoriaService {
 
     @Transactional
     public CategoriaResposta editar(Long eventoId, Long id, CategoriaRequisicao req) {
-        eventoService.buscarEntidade(eventoId).exigirEdicaoPermitida();
+        eventoService.travarParaAlteracao(eventoId).exigirEdicaoPermitida();
         var categoria = buscarEntidade(eventoId, id);
         exigirNomeLivre(eventoId, req.nome(), id);
         if (req.unidade() != categoria.getUnidade() && contribuicaoRepository.somarAtivasDaCategoria(id) > 0) {
@@ -58,7 +58,7 @@ public class CategoriaService {
 
     @Transactional
     public void excluir(Long eventoId, Long id) {
-        eventoService.buscarEntidade(eventoId).exigirEdicaoPermitida();
+        eventoService.travarParaAlteracao(eventoId).exigirEdicaoPermitida();
         var categoria = buscarEntidade(eventoId, id);
         if (itemRepository.existsByCategoriaId(id)) {
             throw new RegraNegocioException("Remova os itens da categoria antes de excluí-la.");

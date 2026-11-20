@@ -48,10 +48,12 @@ export const api = {
 
   listarCategorias: (eventoId) => get(`/eventos/${eventoId}/categorias`),
   criarCategoria: (eventoId, dados) => post(`/eventos/${eventoId}/categorias`, dados),
+  editarCategoria: (eventoId, id, dados) => put(`/eventos/${eventoId}/categorias/${id}`, dados),
   excluirCategoria: (eventoId, id) => remover(`/eventos/${eventoId}/categorias/${id}`),
 
   listarItens: (eventoId) => get(`/eventos/${eventoId}/itens`),
   criarItem: (eventoId, dados) => post(`/eventos/${eventoId}/itens`, dados),
+  editarItem: (eventoId, id, dados) => put(`/eventos/${eventoId}/itens/${id}`, dados),
   excluirItem: (eventoId, id) => remover(`/eventos/${eventoId}/itens/${id}`),
 
   listarParticipantes: () => get('/participantes'),
@@ -65,6 +67,7 @@ export const api = {
 
   listarContribuicoes: (eventoId) => get(`/eventos/${eventoId}/contribuicoes`),
   criarContribuicao: (eventoId, dados) => post(`/eventos/${eventoId}/contribuicoes`, dados),
+  editarContribuicao: (eventoId, id, dados) => put(`/eventos/${eventoId}/contribuicoes/${id}`, dados),
   removerContribuicao: (eventoId, id) => remover(`/eventos/${eventoId}/contribuicoes/${id}`),
 
   cobertura: (eventoId) => get(`/eventos/${eventoId}/cobertura`),

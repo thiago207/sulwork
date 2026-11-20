@@ -71,16 +71,19 @@ function prepararAbas(pagina, eventoId, abaAtiva, contadores, aoTrocar) {
 
 export async function renderDetalheEvento(container, { id, aba }) {
   let abaAtiva = ABAS.includes(aba) ? aba : 'itens';
-  const agora = new Date();
   const [evento, categorias, itens, doEvento, todos, contribuicoes, cobertura, restricoes] = await Promise.all([
     api.buscarEvento(id), api.listarCategorias(id), api.listarItens(id), api.listarParticipantesDoEvento(id),
     api.listarParticipantes(), api.listarContribuicoes(id), api.cobertura(id), api.restricoes(id),
   ]);
+  const agora = new Date();
   const editavel = podeEditar(evento);
   const aberto = aceitaContribuicoes(evento, agora);
 
   // executa a ação e redesenha a página; os botões ficam travados até a resposta (evita clique duplo)
+  let executando = false;
   const executar = async (acao, form) => {
+    if (executando) return undefined;
+    executando = true;
     limparAlertas();
     const botoes = [...container.querySelectorAll('button:not([disabled])')];
     botoes.forEach((b) => { b.disabled = true; });
@@ -93,6 +96,8 @@ export async function renderDetalheEvento(container, { id, aba }) {
       if (form) mostrarErroNoForm(form, erro);
       else mostrarErro(erro);
       return undefined;
+    } finally {
+      executando = false;
     }
   };
   const contexto = { id, executar };

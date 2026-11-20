@@ -49,7 +49,7 @@ class CategoriaServiceTest {
     @EnumSource(value = StatusEvento.class, names = {"RASCUNHO", "ABERTO"})
     void criaEEditaEmRascunhoEAberto(StatusEvento status) {
         var evento = eventoEm(status);
-        when(eventoService.buscarEntidade(1L)).thenReturn(evento);
+        when(eventoService.travarParaAlteracao(1L)).thenReturn(evento);
         when(repository.save(any(Categoria.class))).thenAnswer(inv -> inv.getArgument(0));
         var existente = new Categoria(evento, "Doces", 5, UnidadeMedida.UNIDADE);
         when(repository.findByIdAndEventoId(7L, 1L)).thenReturn(Optional.of(existente));
@@ -61,7 +61,7 @@ class CategoriaServiceTest {
     @ParameterizedTest
     @EnumSource(value = StatusEvento.class, names = {"ENCERRADO", "REALIZADO", "CANCELADO"})
     void bloqueiaCriarEditarEExcluirNosDemaisStatus(StatusEvento status) {
-        when(eventoService.buscarEntidade(1L)).thenReturn(eventoEm(status));
+        when(eventoService.travarParaAlteracao(1L)).thenReturn(eventoEm(status));
 
         assertThatThrownBy(() -> service.criar(1L, REQ)).isInstanceOf(RegraNegocioException.class);
         assertThatThrownBy(() -> service.editar(1L, 7L, REQ)).isInstanceOf(RegraNegocioException.class);
@@ -73,7 +73,7 @@ class CategoriaServiceTest {
     @Test
     void naoExcluiCategoriaComItens() {
         var evento = eventoEm(StatusEvento.RASCUNHO);
-        when(eventoService.buscarEntidade(1L)).thenReturn(evento);
+        when(eventoService.travarParaAlteracao(1L)).thenReturn(evento);
         when(repository.findByIdAndEventoId(7L, 1L)).thenReturn(Optional.of(new Categoria(evento, "Doces", 5, UnidadeMedida.UNIDADE)));
         when(itemRepository.existsByCategoriaId(7L)).thenReturn(true);
 
@@ -87,7 +87,7 @@ class CategoriaServiceTest {
     void excluiCategoriaSemItens() {
         var evento = eventoEm(StatusEvento.ABERTO);
         var categoria = new Categoria(evento, "Doces", 5, UnidadeMedida.UNIDADE);
-        when(eventoService.buscarEntidade(1L)).thenReturn(evento);
+        when(eventoService.travarParaAlteracao(1L)).thenReturn(evento);
         when(repository.findByIdAndEventoId(7L, 1L)).thenReturn(Optional.of(categoria));
 
         service.excluir(1L, 7L);

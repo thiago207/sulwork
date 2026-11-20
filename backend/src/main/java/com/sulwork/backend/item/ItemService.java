@@ -34,7 +34,7 @@ public class ItemService {
 
     @Transactional
     public ItemResposta criar(Long eventoId, ItemRequisicao req) {
-        eventoService.buscarEntidade(eventoId).exigirEdicaoPermitida();
+        eventoService.travarParaAlteracao(eventoId).exigirEdicaoPermitida();
         var categoria = categoriaService.buscarEntidade(eventoId, req.categoriaId());
         var item = new Item(categoria, req.nome(), req.quantidadeNecessaria(), Boolean.TRUE.equals(req.obrigatorio()),
                 req.alergenos());
@@ -43,7 +43,7 @@ public class ItemService {
 
     @Transactional
     public ItemResposta editar(Long eventoId, Long id, ItemRequisicao req) {
-        eventoService.buscarEntidade(eventoId).exigirEdicaoPermitida();
+        eventoService.travarParaAlteracao(eventoId).exigirEdicaoPermitida();
         var item = travar(eventoId, id);
         var categoria = categoriaService.buscarEntidade(eventoId, req.categoriaId());
         item.atualizar(categoria, req.nome(), req.quantidadeNecessaria(), Boolean.TRUE.equals(req.obrigatorio()),
@@ -53,7 +53,7 @@ public class ItemService {
 
     @Transactional
     public void excluir(Long eventoId, Long id) {
-        eventoService.buscarEntidade(eventoId).exigirEdicaoPermitida();
+        eventoService.travarParaAlteracao(eventoId).exigirEdicaoPermitida();
         var item = travar(eventoId, id);
         if (totalContribuido(item) > 0) {
             throw new RegraNegocioException("Não é possível excluir um item que já recebeu contribuições.");

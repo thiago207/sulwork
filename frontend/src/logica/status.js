@@ -1,8 +1,10 @@
+import { compararComDataLocal } from './datas.js';
+
 // o back manda proximosStatus; aqui escondemos o que ele recusaria pela data
 export function transicoesVisiveis(evento, agora) {
   return (evento.proximosStatus ?? []).filter((destino) => {
-    if (evento.status === 'ENCERRADO' && destino === 'ABERTO') return agora < new Date(evento.prazoAlteracoes);
-    if (destino === 'REALIZADO') return agora >= new Date(evento.dataHora);
+    if (evento.status === 'ENCERRADO' && destino === 'ABERTO') return compararComDataLocal(agora, evento.prazoAlteracoes) < 0;
+    if (destino === 'REALIZADO') return compararComDataLocal(agora, evento.dataHora) >= 0;
     return true;
   });
 }
@@ -38,5 +40,5 @@ export function podeEditar(evento) {
 }
 
 export function aceitaContribuicoes(evento, agora) {
-  return evento.status === 'ABERTO' && agora < new Date(evento.prazoAlteracoes);
+  return evento.status === 'ABERTO' && compararComDataLocal(agora, evento.prazoAlteracoes) < 0;
 }

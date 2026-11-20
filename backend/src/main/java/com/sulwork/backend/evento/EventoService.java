@@ -41,21 +41,21 @@ public class EventoService {
 
     @Transactional
     public EventoResposta editar(Long id, EventoRequisicao req) {
-        var evento = buscarEntidade(id);
+        var evento = travarParaAlteracao(id);
         evento.editar(req.nome(), req.descricao(), req.tipo(), req.dataHora(), req.prazoAlteracoes(), agora());
         return EventoMapper.paraResposta(evento);
     }
 
     @Transactional
     public void excluir(Long id) {
-        var evento = buscarEntidade(id);
+        var evento = travarParaAlteracao(id);
         evento.validarExclusao();
         repository.delete(evento);
     }
 
     @Transactional
     public EventoResposta mudarStatus(Long id, StatusEvento destino) {
-        var evento = buscarEntidade(id);
+        var evento = travarParaAlteracao(id);
         if (evento.getStatus() == StatusEvento.RASCUNHO && destino == StatusEvento.ABERTO
                 && !itemRepository.existsByCategoriaEventoId(id)) {
             throw new RegraNegocioException("Cadastre pelo menos um item antes de abrir o evento.");
@@ -66,6 +66,12 @@ public class EventoService {
 
     public Evento buscarEntidade(Long id) {
         return repository.findById(id)
+                .orElseThrow(() -> new NaoEncontradoException("Evento " + id + " não encontrado."));
+    }
+
+    // Toda escrita em um evento começa pelo mesmo lock, antes de acessar os registros vinculados.
+    public Evento travarParaAlteracao(Long id) {
+        return repository.findByIdComLock(id)
                 .orElseThrow(() -> new NaoEncontradoException("Evento " + id + " não encontrado."));
     }
 

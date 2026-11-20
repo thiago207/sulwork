@@ -26,8 +26,8 @@ public class ParticipacaoService {
 
     @Transactional
     public ParticipacaoResposta entrar(Long eventoId, Long participanteId) {
-        var evento = eventoService.buscarEntidade(eventoId);
-        var participante = participanteService.buscarEntidade(participanteId);
+        var evento = eventoService.travarParaAlteracao(eventoId);
+        var participante = participanteService.travarAtivo(participanteId);
         evento.exigirAlteracoesAbertas(LocalDateTime.now(relogio));
 
         // regra 5: se já participou e saiu, reativa a mesma linha
@@ -42,7 +42,7 @@ public class ParticipacaoService {
 
     @Transactional
     public void sair(Long eventoId, Long participanteId) {
-        var evento = eventoService.buscarEntidade(eventoId);
+        var evento = eventoService.travarParaAlteracao(eventoId);
         evento.exigirAlteracoesAbertas(LocalDateTime.now(relogio));
 
         var participacao = repository.findByEventoIdAndParticipanteId(eventoId, participanteId)

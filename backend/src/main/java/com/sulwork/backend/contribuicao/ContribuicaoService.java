@@ -31,7 +31,8 @@ public class ContribuicaoService {
 
     @Transactional
     public ContribuicaoResposta criar(Long eventoId, ContribuicaoRequisicao req) {
-        eventoService.buscarEntidade(eventoId).exigirAlteracoesAbertas(agora());
+        var evento = eventoService.travarParaAlteracao(eventoId);
+        evento.exigirAlteracoesAbertas(agora());
         var participacao = participacaoAtiva(eventoId, req.participanteId());
         var item = travarItem(eventoId, req.itemId());
 
@@ -39,6 +40,7 @@ public class ContribuicaoService {
             throw new ConflitoException("O participante já contribui com este item. Altere a contribuição existente.");
         }
         exigirQuantidadeDisponivel(item, repository.somarAtivasDoItem(item.getId()), req.quantidade());
+        evento.exigirAlteracoesAbertas(agora());
 
         var contribuicao = repository.save(new Contribuicao(participacao, item, req.quantidade()));
         return ContribuicaoMapper.paraResposta(contribuicao);
@@ -46,18 +48,20 @@ public class ContribuicaoService {
 
     @Transactional
     public ContribuicaoResposta alterar(Long eventoId, Long id, int quantidade) {
-        eventoService.buscarEntidade(eventoId).exigirAlteracoesAbertas(agora());
+        var evento = eventoService.travarParaAlteracao(eventoId);
+        evento.exigirAlteracoesAbertas(agora());
         var contribuicao = buscarAtiva(eventoId, id);
         var item = travarItem(eventoId, contribuicao.getItem().getId());
 
         exigirQuantidadeDisponivel(item, repository.somarOutrasAtivasDoItem(item.getId(), id), quantidade);
+        evento.exigirAlteracoesAbertas(agora());
         contribuicao.alterarQuantidade(quantidade);
         return ContribuicaoMapper.paraResposta(contribuicao);
     }
 
     @Transactional
     public void remover(Long eventoId, Long id) {
-        eventoService.buscarEntidade(eventoId).exigirAlteracoesAbertas(agora());
+        eventoService.travarParaAlteracao(eventoId).exigirAlteracoesAbertas(agora());
         buscarAtiva(eventoId, id).remover();
     }
 

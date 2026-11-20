@@ -49,6 +49,7 @@ public class CategoriaController {
     @ApiResponse(responseCode = "201", description = "Criada")
     @ApiResponse(responseCode = "400", description = "Campos inválidos")
     @ApiResponse(responseCode = "404", description = "Evento não encontrado")
+    @ApiResponse(responseCode = "409", description = "Já existe categoria com esse nome no evento")
     @ApiResponse(responseCode = "422", description = "Status do evento não permite edição")
     @PostMapping
     public ResponseEntity<CategoriaResposta> criar(@PathVariable Long eventoId, @Valid @RequestBody CategoriaRequisicao req) {
@@ -60,7 +61,8 @@ public class CategoriaController {
     @ApiResponse(responseCode = "200", description = "OK")
     @ApiResponse(responseCode = "400", description = "Campos inválidos")
     @ApiResponse(responseCode = "404", description = "Evento ou categoria não encontrados")
-    @ApiResponse(responseCode = "422", description = "Status do evento não permite edição")
+    @ApiResponse(responseCode = "409", description = "Já existe categoria com esse nome no evento")
+    @ApiResponse(responseCode = "422", description = "Status não permite edição ou a categoria tem contribuições e a unidade mudou")
     @PutMapping("/{id}")
     public CategoriaResposta editar(@PathVariable Long eventoId, @PathVariable Long id,
                                     @Valid @RequestBody CategoriaRequisicao req) {

@@ -68,6 +68,7 @@ public class ParticipanteController {
     @Operation(summary = "Excluir participante", description = "Exclusão lógica: o participante fica inativo.")
     @ApiResponse(responseCode = "204", description = "Excluído")
     @ApiResponse(responseCode = "404", description = "Participante não encontrado ou inativo")
+    @ApiResponse(responseCode = "422", description = "Participante vinculado a um evento aberto ou encerrado")
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void excluir(@PathVariable Long id) {

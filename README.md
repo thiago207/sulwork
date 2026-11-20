@@ -2,8 +2,8 @@
 
 Organizador de eventos de alimentação da equipe (café da manhã, almoço, lanche, confraternização). O organizador cria o evento, monta as categorias e os itens que precisam ser levados, e cada participante escolhe com o que vai contribuir. O sistema acompanha a cobertura (quanto do necessário já foi prometido), avisa sobre restrições alimentares e alérgenos e sugere a cada pessoa o que ela pode levar.
 
-- Aplicação publicada: [PREENCHER]
-- Swagger da API publicada: [PREENCHER]
+- Repositório: [thiago207/sulwork](https://github.com/thiago207/sulwork)
+- Aplicação e Swagger públicos: publicação pendente. Os endereços locais e a configuração para publicação estão em [Como executar](#como-executar).
 
 ## Sumário
 
@@ -39,7 +39,7 @@ flowchart LR
     end
 
     R --> DB[(PostgreSQL)]
-    F[Flyway<br/>migrations V1 a V6] -->|"cria e evolui o esquema"| DB
+    F[Flyway<br/>migrations V1 a V7] -->|"cria e evolui o esquema"| DB
 ```
 
 Camadas do back:
@@ -73,7 +73,7 @@ Front: HTML, CSS e JavaScript puro em ES modules, sem framework. Cada tela é um
 │       │   └── sugestao/       feature livre "o que eu posso levar"
 │       ├── main/resources/
 │       │   ├── application.properties
-│       │   └── db/migration/   V1 a V6 (Flyway)
+│       │   └── db/migration/   V1 a V7 (Flyway)
 │       └── test/               unitários e integração (Testcontainers)
 └── frontend/                   HTML + JS puro + Bootstrap
     ├── Dockerfile              build com Vite e Nginx servindo a pasta dist
@@ -108,7 +108,7 @@ O pacote do back é organizado por domínio (package by feature): tudo de "item"
 | | Lombok | gerenciado pelo Boot |
 | | Maven (via Maven Wrapper `mvnw`) | |
 | Banco | PostgreSQL | 18 (imagem `postgres:18-alpine`) |
-| Testes do back | JUnit Jupiter | 6.0.3 |
+| Testes do back | JUnit Jupiter | 5.14.2 no perfil de unitários e 6.0.3 na suíte completa |
 | | Mockito | 5.23.0 |
 | | Testcontainers (PostgreSQL) | 2.0.5 |
 | Front | HTML + JavaScript (ES modules) | |
@@ -127,7 +127,7 @@ Diferenças do Spring Boot 4 em relação ao 3 que apareceram no projeto:
   - Um primitivo ausente no JSON agora dá erro. Por isso os campos opcionais dos DTOs usam tipos wrapper (`Boolean`).
   - O projeto desliga `accept-float-as-int`, para que `2.5` num campo inteiro retorne 400 em vez de ser cortado.
 - **Novo nome para o status 422.** O `HttpStatus.UNPROCESSABLE_ENTITY` passou a se chamar `UNPROCESSABLE_CONTENT`.
-- **JUnit 6.** O Boot 4 já traz o JUnit 6 (Jupiter), não o 5. A API de testes usada aqui é a mesma.
+- **JUnit.** O perfil `unitarios-junit5` executa os testes unitários em JUnit 5, conforme o desafio. Os testes de integração usam JUnit 6 porque a extensão de testes da versão do Spring Framework usada pelo projeto exige essa API.
 
 ## Como executar
 
@@ -178,6 +178,13 @@ npm run dev                       # front em http://localhost:5173, recarrega ao
 
 O front em desenvolvimento lê a URL da API de `frontend/.env.development` (`VITE_API_URL`). No build do Docker essa URL é passada como argumento e gravada no JavaScript gerado.
 
+### Configuração para publicação
+
+- Defina `VITE_API_URL` com a URL pública do backend, sem o sufixo `/api`, antes de gerar a imagem do frontend.
+- Defina `CORS_ORIGENS` no backend com a origem pública do frontend, incluindo o protocolo e sem barra final.
+- Configure `DB_URL`, `DB_USUARIO` e `DB_SENHA` para o PostgreSQL do ambiente quando o backend for executado fora do Compose.
+- Valide o frontend e as rotas `/actuator/health`, `/swagger-ui.html` e `/v3/api-docs` na URL pública do backend. Use dados fictícios na demonstração pública.
+
 ## Como executar os testes
 
 **Back** (precisa do Docker rodando, porque os testes de integração sobem um PostgreSQL descartável com Testcontainers):
@@ -185,12 +192,13 @@ O front em desenvolvimento lê a URL da API de `frontend/.env.development` (`VIT
 ```bash
 cd backend
 ./mvnw test
+./mvnw -Punitarios-junit5 test
 ```
 
-São 247 testes, em dois níveis:
+O primeiro comando roda a suíte completa. O segundo roda os unitários com JUnit 5. No Windows, substitua `./mvnw` por `.\mvnw.cmd`.
 
 - **Unitários:** regras das entidades, services com Mockito, CPF, transições de status, cobertura, alérgenos e sugestões.
-- **Integração:** endpoints principais com `@SpringBootTest` + MockMvc + PostgreSQL real, incluindo um teste de concorrência das contribuições (10 requisições simultâneas e exatamente 5 aceitas).
+- **Integração:** endpoints principais com `@SpringBootTest` + MockMvc + PostgreSQL real. Cobre o limite de contribuições concorrentes, a saída e o encerramento durante gravações, o prazo durante a espera por lock, a duplicidade de categorias e a exclusão de participantes.
 
 **Front:**
 
@@ -200,14 +208,15 @@ npm install
 npm test
 ```
 
-São 54 testes com Vitest + jsdom:
+Os testes usam Vitest + jsdom:
 
 - formatação de cobertura;
 - regras de status e confirmação;
 - validação de formulários;
 - máscara de CPF;
 - templates e alertas;
-- duas telas renderizadas com a API falsa (`vi.mock`): a lista de eventos e "O que eu posso levar?".
+- telas e formulários renderizados com a API simulada (`vi.mock`): lista de eventos, sugestões e edição de contribuições, itens e categorias;
+- decisões de prazo e status em diferentes fusos.
 
 > No Windows, rode o `npm test` com o caminho começando em `C:` maiúsculo (ex.: `cd C:\projeto\frontend`). Se o terminal estiver em `c:\` minúsculo, o Node carrega o Vitest duas vezes e os testes falham com `Cannot read properties of undefined (reading 'config')`.
 
@@ -273,18 +282,19 @@ Códigos de erro: **400** validação (com a lista de `campos`), **404** não en
 
 6. **Excluir participante é exclusão lógica (`ativo = false`).**
    - A exclusão é bloqueada (422) se a pessoa tem participação ativa em evento ABERTO ou ENCERRADO; ela precisa sair do evento antes.
-   - Cadastrar de novo com o CPF de um excluído reativa o cadastro com os dados novos.
+   - Quando permitida, a exclusão desativa também as participações e contribuições da pessoa. Os registros ficam no banco, mas deixam de aparecer nas listas e na cobertura, inclusive em eventos realizados e cancelados.
+   - Cadastrar de novo com o CPF de um excluído reativa o cadastro com os dados novos. Os vínculos e contribuições anteriores permanecem inativos.
    - *Por quê:* apagar a pessoa deixaria contribuições "órfãs" contando na cobertura de um evento em andamento. Obrigar a saída antes passa pelo fluxo normal, que respeita o prazo (regra 2).
    - Como o CPF é único também entre inativos, sem a reativação a pessoa ficaria bloqueada para sempre.
 
 7. **A soma das contribuições ativas de um item não passa da quantidade necessária.**
-   - Ao criar ou alterar uma contribuição, a linha do item é travada com lock pessimista (`SELECT ... FOR UPDATE`) antes de somar.
-   - *Por quê:* sem o lock, duas pessoas contribuindo ao mesmo tempo poderiam ler a mesma soma e ultrapassar o limite juntas. O lock força uma a esperar a outra. Isso está coberto por teste de concorrência.
+   - As escritas vinculadas a um evento começam pelo lock da linha do evento. A operação que obtém o lock primeiro prevalece e a seguinte reavalia o status e o prazo depois de esperar. Isso também evita que uma contribuição seja gravada depois que a participação foi desativada.
+   - Ao criar ou alterar uma contribuição, a aplicação trava também o item antes de somar, e confere novamente o prazo antes de gravar.
 
 8. **A quantidade necessária não pode ser reduzida para menos do que já foi contribuído.**
    - *Por quê:* senão a regra 7 seria quebrada "por trás", e itens apareceriam com mais de 100%.
 
-9. **Meta da categoria = soma do que foi contribuído nos itens dela, na unidade da categoria.**
+9. **Progresso da categoria = soma do que foi contribuído nos itens dela, na unidade da categoria, comparada à meta cadastrada.**
    - *Por quê:* a categoria agrupa itens da mesma unidade (litros de bebida, unidades de salgado), então somar faz sentido.
    - O item herda a unidade da categoria justamente para que essa soma nunca misture litros com quilos.
    - A tela avisa quando os itens pedem menos do que a meta, porque nesse caso a categoria nunca chega a 100%.
@@ -309,6 +319,7 @@ Códigos de erro: **400** validação (com a lista de `campos`), **404** não en
   - *Por quê:* realizado é final, e marcar por engano antes da data não teria volta.
 - **Fuso America/Recife.**
   - As datas são `LocalDateTime` comparadas com um `Clock` configurado nesse fuso.
+  - A interface exibe e compara os horários de Recife mesmo quando o navegador está em outro fuso.
   - Nos testes, o `Clock` é fixo, o que deixa as regras de prazo determinísticas.
 - **Exclusão lógica em participante, participação e contribuição.**
   - *Por quê:* preserva o histórico e as restrições de unicidade.
@@ -430,20 +441,18 @@ Um item conflita com uma pessoa quando algum alérgeno dele está no conjunto de
   - A pessoa ainda vê o item na aba de itens, e a nota de "itens ocultos" avisa.
   - Uma melhoria seria esconder só para quem tem o conflito e marcar para os demais.
 - **Quantidades só inteiras.** Para frações, seria preciso trocar os tipos para decimal no banco, nos DTOs e no cálculo.
-- **Edição incompleta na tela.**
-  - Categorias, itens e contribuições têm edição na API (`PUT`), mas a tela permite só incluir e remover.
-  - Participantes já podem ser editados pela tela.
 - **Sem paginação** nas listas de eventos e participantes. Funciona bem para uma equipe, mas não para uma empresa inteira.
-- **Fuso das datas na tela.** As datas aparecem no fuso do navegador; quem acessa de outro fuso vê horários convertidos.
 - **Nada é automático.**
   - O encerramento é manual (decisão da regra 2). Um lembrete automático ao organizador quando o prazo vencer seria útil.
   - Também não há notificação por e-mail ou chat quando falta pouco para o prazo.
-- **Teste de interface.** Só duas telas do front são testadas renderizadas. Testes de ponta a ponta (Playwright, por exemplo) cobririam os fluxos completos no navegador.
+- **Teste de interface.** A suíte renderiza telas e formulários com a API simulada. Testes de ponta a ponta no navegador complementariam essa cobertura.
 
 ## Uso de IA
 
-- **Ferramentas usadas:** [PREENCHER]
-- **Etapas em que ajudou:** [PREENCHER]
-- **Uma sugestão aceita:** [PREENCHER]
-- **Uma sugestão alterada ou rejeitada:** [PREENCHER]
-- **Onde precisei de mais julgamento próprio:** [PREENCHER]
+- **Ferramenta usada nesta revisão:** Codex.
+- **Etapas em que ajudou:** análise do código, reprodução de falhas com testes, implementação das correções e verificação das suítes.
+- **Sugestão incorporada:** ordenar as alterações concorrentes com um lock por evento, para que mudanças de status, participações e contribuições observem a mesma ordem.
+- **Sugestão ajustada:** a tentativa de usar JUnit 5 na suíte inteira foi descartada após erro na extensão do Spring. O JUnit 5 ficou no perfil de unitários, enquanto a integração manteve JUnit 6.
+- **Decisão que exigiu julgamento:** seguir a política da migration V6 e conservar os registros históricos no banco, retirando da cobertura e das listagens os vínculos desativados ao excluir um participante.
+
+Este relato cobre a revisão registrada. O candidato pode complementá-lo com o uso de IA nas etapas anteriores do projeto e com seu próprio relato sobre as decisões.

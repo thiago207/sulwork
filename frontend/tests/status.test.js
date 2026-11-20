@@ -2,10 +2,10 @@ import { describe, expect, it } from 'vitest';
 import { aceitaContribuicoes, botaoDaTransicao, confirmacaoDaTransicao, podeEditar, transicoesVisiveis } from '../src/logica/status.js';
 
 const PRAZO = '2026-12-16T18:00:00';
-const ANTES_DO_PRAZO = new Date('2026-12-10T10:00:00');
-const DEPOIS_DO_PRAZO = new Date('2026-12-17T10:00:00');
+const ANTES_DO_PRAZO = new Date('2026-12-10T10:00:00-03:00');
+const DEPOIS_DO_PRAZO = new Date('2026-12-17T10:00:00-03:00');
 const DATA = '2026-12-18T08:00:00';
-const DEPOIS_DO_EVENTO = new Date('2026-12-18T09:00:00');
+const DEPOIS_DO_EVENTO = new Date('2026-12-18T09:00:00-03:00');
 
 const evento = (status, proximosStatus) => ({ status, proximosStatus, prazoAlteracoes: PRAZO, dataHora: DATA });
 

@@ -16,9 +16,9 @@ function criarLinha(aba, contribuicao, aberto) {
   });
   campo(linha, 'avisos').replaceChildren(...contribuicao.avisos.map((a) => criar('li', 'aviso-alergeno', a)));
   linha.classList.toggle('linha-alerta', contribuicao.avisos.length > 0);
-  const remover = linha.querySelector('[data-acao]');
-  remover.dataset.id = contribuicao.id;
-  remover.hidden = !aberto;
+  const acoes = campo(linha, 'acoes');
+  acoes.dataset.id = contribuicao.id;
+  if (!aberto) acoes.replaceChildren();
   return linha;
 }
 
@@ -34,37 +34,68 @@ export function desenharContribuicoes(aba, { contribuicoes, participantes, cober
   if (!aberto) return;
 
   const pendentes = cobertura.itens.filter((i) => i.faltante > 0);
-  preencherSelect(form.elements.participanteId, participantes.map((p) => [p.id, p.nome]));
-  preencherSelect(form.elements.itemId, pendentes.map((i) => [i.itemId, `${i.nome} (faltam ${i.faltante} ${rotulo(UNIDADES, i.unidade)})`]));
+  const { participanteId, itemId, quantidade } = form.elements;
+  let emEdicao;
+  const mudarModo = (contribuicao) => {
+    emEdicao = contribuicao;
+    form.reset();
+    marcarErros(form, {});
+    participanteId.length = 1;
+    itemId.length = 1;
+    participanteId.disabled = itemId.disabled = Boolean(contribuicao);
+    if (contribuicao) {
+      preencherSelect(participanteId, [[contribuicao.participanteId, contribuicao.participanteNome]]);
+      preencherSelect(itemId, [[contribuicao.itemId, contribuicao.itemNome]]);
+      participanteId.value = contribuicao.participanteId;
+      itemId.value = contribuicao.itemId;
+      quantidade.value = contribuicao.quantidade;
+      quantidade.focus();
+    } else {
+      preencherSelect(participanteId, participantes.map((p) => [p.id, p.nome]));
+      preencherSelect(itemId, pendentes.map((i) => [i.itemId, `${i.nome} (faltam ${i.faltante} ${rotulo(UNIDADES, i.unidade)})`]));
+    }
+    form.querySelector('h3').textContent = contribuicao ? 'Editar contribuição' : 'Nova contribuição';
+    form.querySelector('[type="submit"]').textContent = contribuicao ? 'Salvar contribuição' : 'Incluir contribuição';
+    form.querySelector('[data-cancelar]').hidden = !contribuicao;
+  };
+  mudarModo();
+  form.querySelector('[data-cancelar]').addEventListener('click', () => mudarModo());
 
   form.addEventListener('submit', async (e) => {
     e.preventDefault();
-    const dados = new FormData(form);
     const contribuicao = {
-      participanteId: dados.get('participanteId'),
-      itemId: dados.get('itemId'),
-      quantidade: dados.get('quantidade'),
+      participanteId: participanteId.value,
+      itemId: itemId.value,
+      quantidade: quantidade.value,
     };
     const item = cobertura.itens.find((i) => String(i.itemId) === contribuicao.itemId);
-    const erros = validarContribuicao(contribuicao, item?.faltante);
+    const limite = item && item.faltante + (emEdicao?.quantidade ?? 0);
+    const erros = validarContribuicao(contribuicao, limite);
     marcarErros(form, erros);
     if (Object.keys(erros).length) return;
 
-    const criada = await executar(() => api.criarContribuicao(id, {
-      participanteId: Number(contribuicao.participanteId),
-      itemId: Number(contribuicao.itemId),
-      quantidade: Number(contribuicao.quantidade),
-    }), form);
-    if (criada) {
-      mostrarSucesso('Contribuição incluída.');
-      mostrarAvisos(criada.avisos);
+    const edicao = emEdicao;
+    const salva = await executar(() => edicao
+      ? api.editarContribuicao(id, edicao.id, { quantidade: Number(contribuicao.quantidade) })
+      : api.criarContribuicao(id, {
+        participanteId: Number(contribuicao.participanteId),
+        itemId: Number(contribuicao.itemId),
+        quantidade: Number(contribuicao.quantidade),
+      }), form);
+    if (salva) {
+      mostrarSucesso(edicao ? 'Contribuição atualizada.' : 'Contribuição incluída.');
+      mostrarAvisos(salva.avisos);
     }
   });
 
   aba.querySelector('#linhas-contribuicoes').addEventListener('click', async (e) => {
-    const botao = e.target.closest('[data-acao="remover-contribuicao"]');
-    if (botao && await confirmar({ titulo: 'Remover esta contribuição?', botao: 'Remover' })) {
-      executar(() => api.removerContribuicao(id, botao.dataset.id));
+    const botao = e.target.closest('[data-acao]');
+    if (!botao) return;
+    const alvo = botao.closest('[data-id]').dataset.id;
+    if (botao.dataset.acao === 'editar-contribuicao') {
+      mudarModo(contribuicoes.find((c) => String(c.id) === alvo));
+    } else if (await confirmar({ titulo: 'Remover esta contribuição?', botao: 'Remover' })) {
+      executar(() => api.removerContribuicao(id, alvo));
     }
   });
 }
