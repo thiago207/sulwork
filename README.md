@@ -570,3 +570,10 @@ Um item conflita com uma pessoa quando algum alérgeno dele está no conjunto de
 - **Etapas em que ajudaram:**
   - **Codex:** análise do código, reprodução de falhas com testes, implementação das correções e verificação das suítes.
   - **Claude:** melhoria do código e revisão de código.
+- **Como usei:** antes de gerar código, escrevi um arquivo de instruções com as regras de negócio, a pilha, as convenções (código em português, commits feitos por mim) e as decisões sobre as ambiguidades do enunciado. A IA trabalhou dentro dessas decisões.
+- **Sugestão aceita:** ordenar as alterações concorrentes com um lock por evento, para que mudanças de status, participações e contribuições aconteçam numa ordem só. Aceitei depois de ver as corridas reproduzidas em testes com PostgreSQL real: uma contribuição era gravada depois de a pessoa sair do evento ou depois de o evento ser encerrado.
+- **Sugestão rejeitada:** o Codex apontou dez problemas no projeto. Em vez de mandar corrigir tudo, pedi ao Claude para provar cada um com testes, sem alterar o código. Um dos apontamentos (regras que estariam faltando nas instruções do projeto) não se confirmou, e por isso não mudei nada ali. Os confirmados viraram testes de regressão antes da correção.
+- **Onde houve mais julgamento próprio:**
+  - nas regras de negócio e na interpretação das ambiguidades, como esconder na feature livre só o item que conflita com todos os participantes com restrição;
+  - na escolha de quais problemas corrigir e em que ordem, considerando o prazo de entrega;
+  - no deploy na VPS, que fiz por conta própria.
