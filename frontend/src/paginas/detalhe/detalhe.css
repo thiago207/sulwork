@@ -3,17 +3,31 @@
   padding: 1.5rem;
 }
 
+.evento-topo {
+  display: flex;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  gap: 1rem 1.5rem;
+}
+
+.evento-identidade {
+  flex: 1 1 26rem;
+  min-width: 0;
+}
+
 .cabecalho-evento-nome {
-  margin: 0 0 0.35rem;
-  font-size: 1.75rem;
-  font-weight: 700;
+  margin: 0 0 0.45rem;
+  color: var(--cor-azul);
+  font-size: clamp(1.55rem, 3.5vw, 2.35rem);
+  font-weight: 650;
   overflow-wrap: anywhere;
 }
 
 .cabecalho-evento-descricao {
   max-width: 62ch;
-  margin: 0 0 0.75rem;
+  margin: 0 0 0.85rem;
   color: var(--cor-texto-medio);
+  overflow-wrap: anywhere;
 }
 
 .cabecalho-evento-descricao:empty {
@@ -26,7 +40,7 @@
   gap: 0.35rem;
   font-size: 0.8125rem;
   font-weight: 500;
-  color: var(--cor-texto-suave);
+  color: var(--cor-azul);
 }
 
 .metas {
@@ -51,23 +65,23 @@
 
 .resumo {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(11rem, 1fr));
-  gap: 0.75rem;
-  margin-top: 1.25rem;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  margin-top: 1.4rem;
+  border-block: 1px solid var(--cor-borda);
+  background: var(--cor-superficie-2);
 }
 
 .resumo-item {
   padding: 0.85rem 1rem;
-  background: var(--cor-superficie-2);
-  border: 1px solid var(--cor-borda);
-  border-radius: var(--raio-pequeno);
+}
+
+.resumo-item + .resumo-item {
+  border-left: 1px solid var(--cor-borda);
 }
 
 .resumo-rotulo {
-  font-size: 0.7rem;
+  font-size: 0.8125rem;
   font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
   color: var(--cor-texto-suave);
 }
 
@@ -98,8 +112,6 @@
   align-items: center;
   gap: 0.75rem;
   margin-top: 1.25rem;
-  padding-top: 1.25rem;
-  border-top: 1px solid var(--cor-borda);
 }
 
 .transicoes-rotulo {
@@ -108,7 +120,7 @@
   color: var(--cor-texto-suave);
 }
 
-/* abas com sublinhado; rolam na horizontal em tela pequena */
+/* abas com sublinhado */
 .abas {
   flex-wrap: nowrap;
   gap: 0.25rem;
@@ -122,7 +134,7 @@
   align-items: center;
   gap: 0.4rem;
   margin-bottom: -1px;
-  padding: 0.7rem 0.9rem;
+  padding: 0.7rem 0.75rem;
   font-weight: 500;
   white-space: nowrap;
   color: var(--cor-texto-suave);
@@ -165,6 +177,7 @@
   margin: 0;
   font-size: 1rem;
   font-weight: 600;
+  overflow-wrap: anywhere;
 }
 
 .categoria-meta {
@@ -212,6 +225,7 @@
 .linha-item-nome {
   margin-right: 0.4rem;
   font-weight: 500;
+  overflow-wrap: anywhere;
 }
 
 .linha-item-qtd {
@@ -310,9 +324,9 @@
   padding: 0.4rem 0.75rem 0.4rem 0.4rem;
   font-size: 0.875rem;
   font-weight: 500;
-  background: #eef2ff;
-  color: #3730a3;
-  border-radius: 999px;
+  background: #eaf2f7;
+  color: var(--cor-azul);
+  border-radius: var(--raio-pequeno);
 }
 
 .resumo-restricao-qtd {
@@ -324,5 +338,51 @@
   font-size: 0.8rem;
   font-weight: 700;
   background: #fff;
-  border-radius: 999px;
+  border-radius: 0.25rem;
+}
+
+@media (max-width: 575px) {
+  .cabecalho-evento .card-body {
+    padding: 1rem;
+  }
+
+  .resumo {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .resumo-item {
+    padding: 0.65rem 0.75rem;
+  }
+
+  .resumo-item:last-child {
+    grid-column: 1 / -1;
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 0.5rem;
+    border-left: 0;
+    border-top: 1px solid var(--cor-borda);
+  }
+
+  .abas {
+    flex-wrap: wrap;
+    gap: 0 0.35rem;
+    overflow-x: visible;
+  }
+
+  .abas .nav-link {
+    padding-inline: 0.55rem;
+    font-size: 0.875rem;
+  }
+
+  .linha-item {
+    flex-wrap: wrap;
+    gap: 0.45rem;
+  }
+
+  .linha-item .chips:not(:empty) {
+    order: 1;
+    width: 100%;
+    justify-content: flex-start;
+  }
 }

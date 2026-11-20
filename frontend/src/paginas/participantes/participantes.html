@@ -1,11 +1,24 @@
 <header class="cabecalho-pagina">
   <div>
     <h1>Participantes</h1>
-    <p class="subtitulo">Pessoas da equipe e as restrições alimentares de cada uma.</p>
   </div>
 </header>
 
 <div class="row g-4">
+  <div class="col-lg-7">
+    <section class="card">
+      <div class="card-header d-flex flex-wrap justify-content-between align-items-center gap-2 py-3">
+        <h2 class="titulo-card m-0">Cadastrados <span class="contador" id="total"></span></h2>
+        <div class="busca">
+          <i class="bi bi-search" aria-hidden="true"></i>
+          <input class="form-control form-control-sm" type="search" id="busca" placeholder="Buscar pelo nome" aria-label="Buscar pelo nome">
+        </div>
+      </div>
+      <ul class="list-group list-group-flush" id="lista-participantes"></ul>
+      <p class="text-secondary text-center m-0 p-4" id="sem-participantes" hidden></p>
+    </section>
+  </div>
+
   <div class="col-lg-5">
     <form id="form-participante" class="card" novalidate>
       <div class="card-body p-4">
@@ -38,17 +51,4 @@
     </form>
   </div>
 
-  <div class="col-lg-7">
-    <section class="card">
-      <div class="card-header d-flex flex-wrap justify-content-between align-items-center gap-2 py-3">
-        <span class="fw-semibold">Cadastrados <span class="contador ms-1" id="total"></span></span>
-        <div class="busca">
-          <i class="bi bi-search"></i>
-          <input class="form-control form-control-sm" type="search" id="busca" placeholder="Buscar pelo nome" aria-label="Buscar pelo nome">
-        </div>
-      </div>
-      <ul class="list-group list-group-flush" id="lista-participantes"></ul>
-      <p class="text-secondary text-center m-0 p-4" id="sem-participantes" hidden></p>
-    </section>
-  </div>
 </div>

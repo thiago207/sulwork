@@ -1,66 +1,175 @@
+.agenda-cabecalho {
+  align-items: center;
+}
+
+.agenda {
+  border: 1px solid var(--cor-borda);
+  border-radius: var(--raio);
+  background: var(--cor-superficie);
+}
+
+.agenda-filtros {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.7rem;
+  padding: 0.8rem 1.2rem;
+  color: var(--cor-texto-medio);
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
 .filtro-status {
   width: auto;
-  min-width: 11rem;
+  min-width: 10rem;
+  font-size: inherit;
 }
 
-.evento-card {
+.agenda-colunas,
+.evento-linha {
+  display: grid;
+  grid-template-columns: 6rem minmax(0, 1fr) minmax(9rem, 0.45fr) 6.5rem 1rem;
+  align-items: center;
+  gap: 1.25rem;
+  padding-inline: 1.2rem;
+}
+
+.agenda-colunas {
+  padding-block: 0.55rem;
+  border-block: 1px solid var(--cor-borda);
+  background: var(--cor-neutra);
+  color: var(--cor-azul);
+  font-size: 0.75rem;
+  font-weight: 650;
+}
+
+#lista-eventos {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+#lista-eventos li + li {
+  border-top: 1px solid var(--cor-borda);
+}
+
+.evento-linha {
+  min-height: 5.25rem;
+  padding-block: 0.8rem;
   color: inherit;
   text-decoration: none;
-  transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
 }
 
-.evento-card:hover {
+.evento-linha:hover,
+.evento-linha:focus-visible {
   color: inherit;
-  transform: translateY(-2px);
-  box-shadow: var(--sombra-elevada);
-  border-color: var(--cor-borda-forte);
-}
-
-.evento-card[data-status='CANCELADO'],
-.evento-card[data-status='REALIZADO'] {
-  opacity: 0.75;
-}
-
-.data-tile {
-  flex: none;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  width: 3.5rem;
-  height: 3.75rem;
-  border-radius: 0.75rem;
   background: var(--cor-marca-suave);
-  color: var(--cor-marca-escura);
 }
 
-.data-tile-dia {
+.evento-linha:focus-visible {
+  outline-offset: -2px;
+}
+
+.evento-data {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  align-items: baseline;
+  gap: 0 0.35rem;
+  color: var(--cor-azul);
+  font-variant-numeric: tabular-nums;
+}
+
+.evento-dia {
   font-size: 1.35rem;
-  font-weight: 700;
-  line-height: 1;
+  font-weight: 650;
+  line-height: 1.2;
 }
 
-.data-tile-mes {
-  margin-top: 0.2rem;
-  font-size: 0.7rem;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
+.evento-mes,
+.evento-ano {
+  color: var(--cor-texto-suave);
+  font-size: 0.75rem;
 }
 
-.evento-card-nome {
-  margin: 0;
-  font-size: 1.05rem;
-  font-weight: 600;
+.evento-ano {
+  grid-column: 1 / -1;
+}
+
+.evento-nome h2 {
+  margin: 0 0 0.15rem;
+  font-size: 1rem;
+  font-weight: 650;
   overflow-wrap: anywhere;
 }
 
-.evento-card-info {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 0.35rem;
-  margin: 0.4rem 0 0;
-  font-size: 0.85rem;
+.evento-nome > span,
+.evento-tipo {
   color: var(--cor-texto-suave);
+  font-size: 0.8125rem;
+}
+
+.evento-tipo {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+}
+
+.evento-tipo .bi,
+.evento-seta {
+  color: var(--cor-azul);
+}
+
+.evento-linha .badge-status {
+  justify-self: start;
+}
+
+.agenda-vazia {
+  margin: 0;
+  padding: 1.5rem 1.2rem;
+  border-top: 1px solid var(--cor-borda);
+  color: var(--cor-texto-suave);
+}
+
+@media (max-width: 720px) {
+  .agenda-colunas,
+  .evento-seta {
+    display: none;
+  }
+
+  #lista-eventos {
+    border-top: 1px solid var(--cor-borda);
+  }
+
+  .evento-linha {
+    grid-template-columns: 3.1rem minmax(0, 1fr) auto;
+    gap: 0.2rem 0.65rem;
+    padding: 0.75rem;
+  }
+
+  .evento-data {
+    grid-row: span 2;
+    align-self: start;
+    gap: 0 0.2rem;
+  }
+
+  .evento-dia {
+    font-size: 1.125rem;
+  }
+
+  .evento-nome {
+    grid-column: 2;
+    grid-row: 1;
+  }
+
+  .evento-tipo {
+    grid-column: 2;
+    grid-row: 2;
+  }
+
+  .evento-linha .badge-status {
+    grid-column: 3;
+    grid-row: 1 / span 2;
+    align-self: start;
+    margin-top: 0.1rem;
+  }
 }

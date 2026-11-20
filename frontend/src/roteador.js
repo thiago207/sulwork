@@ -17,7 +17,10 @@ const rotas = [
 
 function marcarMenu(hash) {
   document.querySelectorAll('[data-nav]').forEach((link) => {
-    link.classList.toggle('active', hash.startsWith(`#/${link.dataset.nav}`));
+    const ativo = hash.startsWith(`#/${link.dataset.nav}`);
+    link.classList.toggle('active', ativo);
+    if (ativo) link.setAttribute('aria-current', 'location');
+    else link.removeAttribute('aria-current');
   });
 }
 

@@ -1,44 +1,43 @@
-<header class="cabecalho-pagina">
+<header class="cabecalho-pagina agenda-cabecalho">
   <div>
-    <h1>Eventos</h1>
-    <p class="subtitulo">Cafés, almoços e confraternizações da equipe.</p>
+    <h1>Agenda de eventos</h1>
+    <p class="subtitulo">Datas e horários de Recife.</p>
   </div>
-  <div class="d-flex flex-wrap gap-2">
-    <select class="form-select filtro-status" id="filtro-status" aria-label="Filtrar por status">
-      <option value="">Todos os status</option>
-    </select>
-    <a class="btn btn-primary text-nowrap" href="#/eventos/novo"><i class="bi bi-plus-lg"></i> Novo evento</a>
-  </div>
+  <a class="btn btn-primary text-nowrap" href="#/eventos/novo"><i class="bi bi-plus-lg" aria-hidden="true"></i> Novo evento</a>
 </header>
 
-<div class="row g-3" id="lista-eventos"></div>
-
-<div class="vazio" id="sem-eventos" hidden>
-  <i class="bi bi-calendar-x"></i>
-  <p>Nenhum evento encontrado.</p>
-</div>
+<section class="agenda" aria-label="Eventos cadastrados">
+  <div class="agenda-filtros">
+    <label for="filtro-status">Status</label>
+    <select class="form-select filtro-status" id="filtro-status">
+      <option value="">Todos os status</option>
+    </select>
+  </div>
+  <div class="agenda-colunas" id="colunas-eventos" aria-hidden="true">
+    <span>Data</span><span>Evento</span><span>Tipo</span><span>Status</span>
+  </div>
+  <ul id="lista-eventos"></ul>
+  <p class="agenda-vazia" id="sem-eventos" hidden>Nenhum evento encontrado.</p>
+</section>
 
 <template data-modelo="evento">
-  <div class="col-md-6 col-xl-4">
-    <a class="card evento-card h-100">
-      <div class="card-body d-flex gap-3">
-        <div class="data-tile">
-          <span class="data-tile-dia" data-campo="dia"></span>
-          <span class="data-tile-mes" data-campo="mes"></span>
-        </div>
-        <div class="flex-grow-1 min-w-0">
-          <div class="d-flex justify-content-between align-items-start gap-2">
-            <h2 class="evento-card-nome" data-campo="nome"></h2>
-            <span class="badge-status" data-campo="status"></span>
-          </div>
-          <p class="evento-card-info">
-            <i class="bi" data-icone-tipo></i>
-            <span data-campo="tipo"></span>
-            <span aria-hidden="true">·</span>
-            <span data-campo="quando"></span>
-          </p>
-        </div>
+  <li>
+    <a class="evento-linha">
+      <time class="evento-data">
+        <span class="evento-dia" data-campo="dia"></span>
+        <span class="evento-mes" data-campo="mes"></span>
+        <span class="evento-ano" data-campo="ano"></span>
+      </time>
+      <div class="evento-nome">
+        <h2 data-campo="nome"></h2>
+        <span data-campo="quando"></span>
       </div>
+      <span class="evento-tipo">
+        <i class="bi" data-icone-tipo aria-hidden="true"></i>
+        <span data-campo="tipo"></span>
+      </span>
+      <span class="badge-status" data-campo="status"></span>
+      <i class="bi bi-chevron-right evento-seta" aria-hidden="true"></i>
     </a>
-  </div>
+  </li>
 </template>

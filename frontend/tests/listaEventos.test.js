@@ -14,7 +14,7 @@ const eventos = [
 
 describe('tela de lista de eventos', () => {
   let container;
-  const cartoes = () => container.querySelectorAll('#lista-eventos .evento-card');
+  const linhas = () => container.querySelectorAll('#lista-eventos .evento-linha');
 
   beforeEach(() => {
     document.body.innerHTML = '<div id="alertas"></div><main id="app"></main>';
@@ -22,13 +22,13 @@ describe('tela de lista de eventos', () => {
     api.listarEventos.mockReset();
   });
 
-  it('mostra um card por evento com data, tipo e status', async () => {
+  it('mostra uma linha por evento com data, tipo e status', async () => {
     api.listarEventos.mockResolvedValue(eventos);
 
     await renderListaEventos(container);
 
-    expect(cartoes()).toHaveLength(2);
-    const primeiro = cartoes()[0];
+    expect(linhas()).toHaveLength(2);
+    const primeiro = linhas()[0];
     expect(primeiro.getAttribute('href')).toBe('#/eventos/1');
     expect(primeiro.querySelector('[data-campo="dia"]').textContent).toBe('18');
     expect(primeiro.querySelector('[data-campo="mes"]').textContent).toBe('dez');
@@ -47,7 +47,7 @@ describe('tela de lista de eventos', () => {
     await renderListaEventos(container);
 
     expect(container.querySelector('#lista-eventos img')).toBeNull();
-    expect(cartoes()[1].querySelector('[data-campo="nome"]').textContent).toBe('<img src=x onerror=alert(1)>');
+    expect(linhas()[1].querySelector('[data-campo="nome"]').textContent).toBe('<img src=x onerror=alert(1)>');
   });
 
   it('filtrar por status chama a API com o status escolhido', async () => {
@@ -58,7 +58,7 @@ describe('tela de lista de eventos', () => {
     expect(filtro.options).toHaveLength(6);
     filtro.value = 'ABERTO';
     filtro.dispatchEvent(new Event('change'));
-    await vi.waitFor(() => expect(cartoes()).toHaveLength(1));
+    await vi.waitFor(() => expect(linhas()).toHaveLength(1));
 
     expect(api.listarEventos).toHaveBeenLastCalledWith('ABERTO');
   });
@@ -68,7 +68,7 @@ describe('tela de lista de eventos', () => {
 
     await renderListaEventos(container);
 
-    expect(cartoes()).toHaveLength(0);
+    expect(linhas()).toHaveLength(0);
     expect(container.querySelector('#sem-eventos').hidden).toBe(false);
   });
 });

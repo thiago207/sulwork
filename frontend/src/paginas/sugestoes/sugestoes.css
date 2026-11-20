@@ -11,14 +11,12 @@
 }
 
 .sugestao.obrigatoria {
-  border-top: 3px solid var(--cor-marca);
+  border-top: 2px solid var(--cor-marca-clara);
 }
 
 .sugestao-categoria {
-  font-size: 0.7rem;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
+  font-size: 0.8125rem;
+  font-weight: 500;
   color: var(--cor-texto-suave);
 }
 
@@ -26,6 +24,7 @@
   margin: 0.2rem 0 0.75rem;
   font-size: 1.1rem;
   font-weight: 600;
+  overflow-wrap: anywhere;
 }
 
 .sugestao-faltante {

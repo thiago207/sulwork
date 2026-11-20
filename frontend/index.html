@@ -3,27 +3,25 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#28495b" />
+    <link rel="icon" type="image/svg+xml" href="/sulwork.svg" />
     <title>Sulwork Eventos</title>
   </head>
   <body>
-    <nav class="navbar navbar-expand barra-topo">
-      <div class="container">
+    <nav class="barra-topo" aria-label="Navegação principal">
+      <div class="moldura barra-topo-conteudo">
         <a class="navbar-brand marca" href="#/eventos">
-          <span class="marca-icone"><i class="bi bi-basket2-fill"></i></span>
-          <span>Sulwork <span class="marca-sub">Eventos</span></span>
+          <img src="/sulwork.svg" width="32" height="32" alt="" />
+          <span>Sulwork</span>
         </a>
-        <div class="navbar-nav gap-1">
-          <a class="nav-link" href="#/eventos" data-nav="eventos">
-            <i class="bi bi-calendar-event"></i><span class="d-none d-sm-inline">Eventos</span>
-          </a>
-          <a class="nav-link" href="#/participantes" data-nav="participantes">
-            <i class="bi bi-people"></i><span class="d-none d-sm-inline">Participantes</span>
-          </a>
+        <div class="menu-principal">
+          <a class="nav-link" href="#/eventos" data-nav="eventos">Eventos</a>
+          <a class="nav-link" href="#/participantes" data-nav="participantes">Participantes</a>
         </div>
       </div>
     </nav>
 
-    <div class="container py-4">
+    <div class="moldura conteudo-principal">
       <div id="alertas"></div>
       <div id="carregando" class="carregando" hidden>
         <div class="spinner-border" role="status"><span class="visually-hidden">Carregando...</span></div>
