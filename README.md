@@ -2,8 +2,15 @@
 
 Organizador de eventos de alimentação da equipe (café da manhã, almoço, lanche, confraternização). O organizador cria o evento, monta as categorias e os itens que precisam ser levados, e cada participante escolhe com o que vai contribuir. O sistema acompanha a cobertura (quanto do necessário já foi prometido), avisa sobre restrições alimentares e alérgenos e sugere a cada pessoa o que ela pode levar.
 
-- Repositório: [thiago207/sulwork](https://github.com/thiago207/sulwork)
-- Aplicação e Swagger públicos: publicação pendente. Os endereços locais e a configuração para publicação estão em [Como executar](#como-executar).
+| | Link |
+|---|---|
+| Aplicação | https://sulwork.tech |
+| API | https://api.sulwork.tech (rotas em `/api`) |
+| Swagger UI | https://api.sulwork.tech/swagger-ui.html |
+| OpenAPI (JSON) | https://api.sulwork.tech/v3/api-docs |
+| Repositório | https://github.com/thiago207/sulwork |
+
+Como a publicação foi feita está em [Deploy](#deploy).
 
 ## Sumário
 
@@ -12,6 +19,7 @@ Organizador de eventos de alimentação da equipe (café da manhã, almoço, lan
 - [Tecnologias e versões](#tecnologias-e-versões)
 - [Como executar](#como-executar)
 - [Como executar os testes](#como-executar-os-testes)
+- [Deploy](#deploy)
 - [API](#api)
 - [Decisões e premissas](#decisões-e-premissas)
 - [Ambiguidades do enunciado e como foram resolvidas](#ambiguidades-do-enunciado-e-como-foram-resolvidas)
@@ -57,6 +65,9 @@ Front: HTML, CSS e JavaScript puro em ES modules, sem framework. Cada tela é um
 ```
 .
 ├── docker-compose.yml          banco + back + front
+├── docker-compose.prod.yml     ajustes de produção: fecha portas e adiciona o Caddy
+├── Caddyfile                   domínios e proxy reverso com HTTPS
+├── .env.example                modelo das variáveis de ambiente
 ├── backend/                    API Spring Boot
 │   ├── Dockerfile              build com Maven e imagem final só com o JRE
 │   └── src/
@@ -116,6 +127,7 @@ O pacote do back é organizado por domínio (package by feature): tudo de "item"
 | | Vite | 8.3 |
 | | Vitest + jsdom | 5.1 / 31.0 |
 | Infra | Docker Compose, Nginx 1.29, Node 24 (só no build do front) | |
+| Produção | Ubuntu 24.04 LTS, Docker 29, Docker Compose v5, Caddy 2 | |
 
 Diferenças do Spring Boot 4 em relação ao 3 que apareceram no projeto:
 
@@ -178,13 +190,6 @@ npm run dev                       # front em http://localhost:5173, recarrega ao
 
 O front em desenvolvimento lê a URL da API de `frontend/.env.development` (`VITE_API_URL`). No build do Docker essa URL é passada como argumento e gravada no JavaScript gerado.
 
-### Configuração para publicação
-
-- Defina `VITE_API_URL` com a URL pública do backend, sem o sufixo `/api`, antes de gerar a imagem do frontend.
-- Defina `CORS_ORIGENS` no backend com a origem pública do frontend, incluindo o protocolo e sem barra final.
-- Configure `DB_URL`, `DB_USUARIO` e `DB_SENHA` para o PostgreSQL do ambiente quando o backend for executado fora do Compose.
-- Valide o frontend e as rotas `/actuator/health`, `/swagger-ui.html` e `/v3/api-docs` na URL pública do backend. Use dados fictícios na demonstração pública.
-
 ## Como executar os testes
 
 **Back** (precisa do Docker rodando, porque os testes de integração sobem um PostgreSQL descartável com Testcontainers):
@@ -219,6 +224,118 @@ Os testes usam Vitest + jsdom:
 - decisões de prazo e status em diferentes fusos.
 
 > No Windows, rode o `npm test` com o caminho começando em `C:` maiúsculo (ex.: `cd C:\projeto\frontend`). Se o terminal estiver em `c:\` minúsculo, o Node carrega o Vitest duas vezes e os testes falham com `Cannot read properties of undefined (reading 'config')`.
+
+## Deploy
+
+### Onde está publicado
+
+- **Servidor:** VPS Hostinger KVM 1, com Ubuntu 24.04 LTS, localizada no Brasil.
+- **Software:** Docker 29 e Docker Compose v5. Sobe o mesmo `docker-compose.yml` do ambiente local, mais um arquivo de produção por cima.
+- **DNS:** o domínio `sulwork.tech` tem dois registros do tipo A apontando para o IP da VPS.
+
+| Registro | Domínio | Serviço |
+|---|---|---|
+| `@` | https://sulwork.tech | front |
+| `api` | https://api.sulwork.tech | back (API, Swagger e OpenAPI) |
+
+```mermaid
+flowchart LR
+    U([Navegador]) -->|"HTTPS 443<br/>(80 redireciona)"| C
+
+    subgraph VPS [VPS Ubuntu 24.04, rede interna do Docker]
+        C[Caddy<br/>proxy reverso + HTTPS] -->|"sulwork.tech"| F[frontend<br/>Nginx :80]
+        C -->|"api.sulwork.tech"| B[backend<br/>Spring Boot :8080]
+        B --> DB[(PostgreSQL :5432)]
+    end
+```
+
+O navegador baixa o front em `sulwork.tech` e, a partir dele, chama a API em `api.sulwork.tech`. As duas requisições passam pelo Caddy, que escolhe o container pelo domínio. Banco, backend e frontend só são acessíveis pela rede interna do Docker.
+
+### Por que Caddy
+
+- **HTTPS automático.** O Caddy obtém e renova sozinho os certificados da Let's Encrypt para os domínios do `Caddyfile`, sem certbot nem tarefa agendada.
+- **Configuração curta.** O [Caddyfile](Caddyfile) tem um bloco por domínio, com o destino de cada um.
+- **Roda como mais um container.** Ele entra no mesmo Compose e encontra os outros serviços pelo nome (`frontend`, `backend`).
+
+### Como as portas ficam fechadas
+
+- O [docker-compose.prod.yml](docker-compose.prod.yml) sobrescreve o `docker-compose.yml`:
+  - remove as portas publicadas de banco, backend e frontend (`ports: !reset []`);
+  - adiciona `restart: unless-stopped`, para os containers voltarem sozinhos depois de um reinício da VPS;
+  - adiciona o serviço `caddy`, o único que publica portas (80 e 443).
+- O firewall `ufw` libera só OpenSSH, 80 e 443.
+- **Por que não basta o firewall:** as portas publicadas pelo Docker passam por cima do `ufw`, porque o Docker cria as próprias regras de rede. Se o banco publicasse a 5432, ele ficaria exposto mesmo com o `ufw` bloqueando. Por isso a proteção é não publicar a porta.
+
+### Variáveis de ambiente
+
+Ficam num `.env` na raiz do projeto, no servidor. O arquivo está no `.gitignore` e tem permissão `chmod 600` (só o dono lê). O modelo, sem valores reais, é o [.env.example](.env.example).
+
+| Variável | Usada por | Para que serve |
+|---|---|---|
+| `DB_NOME` | banco e backend | nome do banco |
+| `DB_USUARIO` | banco e backend | usuário do banco |
+| `DB_SENHA` | banco e backend | senha do banco, gerada com `openssl rand -hex 24` |
+| `FRONT_DOMINIO` | caddy | domínio do front (`sulwork.tech`) |
+| `API_DOMINIO` | caddy | domínio da API (`api.sulwork.tech`) |
+| `CORS_ORIGENS` | backend | origem do front liberada no CORS, com protocolo e sem barra final |
+| `VITE_API_URL` | build do frontend | URL da API que o navegador usa, sem o sufixo `/api` |
+
+O `VITE_API_URL` é gravado no JavaScript durante o build. Se ele mudar, a imagem do front precisa ser gerada de novo (`--build`). Fora do Compose, o backend também aceita `DB_URL` com a URL JDBC do banco.
+
+### Publicar do zero numa VPS com Docker
+
+1. Crie os dois registros DNS do tipo A (`@` e `api`) apontando para o IP da VPS. O Caddy só consegue emitir o certificado depois que os domínios resolvem para o servidor.
+2. Libere só o necessário no firewall:
+
+   ```bash
+   sudo ufw allow OpenSSH
+   sudo ufw allow 80/tcp
+   sudo ufw allow 443/tcp
+   sudo ufw enable
+   ```
+
+3. Baixe o projeto:
+
+   ```bash
+   git clone https://github.com/thiago207/sulwork.git
+   cd sulwork
+   ```
+
+4. Crie o `.env` a partir do modelo, coloque uma senha gerada em `DB_SENHA`, ajuste os domínios e proteja o arquivo:
+
+   ```bash
+   cp .env.example .env
+   openssl rand -hex 24      # copie o resultado para DB_SENHA
+   nano .env
+   chmod 600 .env
+   ```
+
+5. Suba tudo:
+
+   ```bash
+   docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d --build
+   ```
+
+6. Confira:
+
+   ```bash
+   docker compose -f docker-compose.yml -f docker-compose.prod.yml ps
+   docker compose -f docker-compose.yml -f docker-compose.prod.yml logs -f caddy
+   curl https://api.sulwork.tech/actuator/health
+   ```
+
+### Atualizar depois de um novo push
+
+Na pasta do projeto, no servidor:
+
+```bash
+git pull
+docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d --build
+```
+
+- O Compose gera de novo as imagens que mudaram e recria só os containers afetados.
+- O Flyway aplica as migrations novas quando o backend sobe.
+- Os dados do banco ficam no volume `dados_banco`, e os certificados no volume `caddy_data`. Nenhum dos dois é apagado na atualização.
 
 ## API
 
@@ -336,7 +453,7 @@ Códigos de erro: **400** validação (com a lista de `campos`), **404** não en
 | O status muda sozinho quando o prazo vence? | Não. O prazo bloqueia alterações; o organizador encerra manualmente (regra 2). |
 | Qual a unidade do item? | A da categoria. Isso mantém a soma da meta coerente (regra 9). |
 | O que acontece com as contribuições de quem sai do evento? | Ficam inativas e saem das somas. Se a pessoa voltar, a participação é reativada, mas as contribuições não (regra 5). |
-| E com as de quem é excluído do sistema? | A exclusão é bloqueada enquanto a pessoa está em evento em andamento; ela sai antes, pelo fluxo normal (regra 6). Dados antigos nessa situação foram corrigidos pela migration V6. |
+| E com as de quem é excluído do sistema? | A exclusão é bloqueada enquanto a pessoa está em evento em andamento; ela sai antes, pelo fluxo normal (regra 6). Dados antigos nessa situação foram corrigidos pelas migrations V6 e V7. |
 | O CPF de um participante excluído pode ser reutilizado? | Pode, e o cadastro antigo é reativado com os dados novos (regra 6). |
 | Quantidades podem ter casas decimais? | Não. São inteiras e valor decimal retorna 400. |
 | Na feature livre, "excluir itens que conflitam com as restrições de qualquer participante ativo" e ao mesmo tempo "marcar os que conflitam só com alguns" se contradizem: se qualquer conflito exclui, não sobra nada para marcar. | Um item é excluído quando conflita com **todos** os participantes que têm restrição; quando conflita só com **alguns**, aparece marcado com quantas pessoas e quais restrições ele afeta. |
@@ -410,7 +527,7 @@ Um item conflita com uma pessoa quando algum alérgeno dele está no conjunto de
 - **Resumo do evento:** quantos participantes ativos têm cada restrição, e as observações livres que eles deixaram (ex.: "alergia grave, evitar traços").
 - **Por item:** quantos participantes são afetados e por quais restrições. As linhas afetadas ficam destacadas.
 - **Ao contribuir:** se o item conflita com a restrição de quem está levando, a contribuição é aceita e volta com um aviso em destaque (ex.: "O item Coxinha contém carne, que conflita com sua restrição: vegano.").
-  - *Por quê não bloquear:* a pessoa pode estar levando para os outros; quem decide é ela.
+  - *Por que não bloquear:* a pessoa pode estar levando para os outros; quem decide é ela.
 
 **Por que o mapeamento fica no enum:** a regra fica num lugar só, é testável sem banco e uma restrição nova é uma linha no enum (mais o CHECK no banco, como a migration V6 fez com "Alergia a peixe" e "Sem mel").
 
@@ -435,7 +552,7 @@ Um item conflita com uma pessoa quando algum alérgeno dele está no conjunto de
 ## Limitações conhecidas e melhorias futuras
 
 - **Sem autenticação.**
-  - Qualquer pessoa com acesso à tela pode escolher outro nome em "Quem é você?" e agir como outro participante.
+  - Qualquer pessoa com acesso à tela pode escolher outro nome no campo "Participante" de "O que eu posso levar?" e agir como outro participante.
   - O próximo passo seria login (por exemplo OAuth2 com o provedor da empresa) e a separação entre organizador e participante.
 - **Caso de borda na feature livre:** se só uma pessoa do evento tem restrição, qualquer item que conflite com ela some da sugestão de todos.
   - A pessoa ainda vê o item na aba de itens, e a nota de "itens ocultos" avisa.
@@ -449,10 +566,7 @@ Um item conflita com uma pessoa quando algum alérgeno dele está no conjunto de
 
 ## Uso de IA
 
-- **Ferramenta usada nesta revisão:** Codex.
-- **Etapas em que ajudou:** análise do código, reprodução de falhas com testes, implementação das correções e verificação das suítes.
-- **Sugestão incorporada:** ordenar as alterações concorrentes com um lock por evento, para que mudanças de status, participações e contribuições observem a mesma ordem.
-- **Sugestão ajustada:** a tentativa de usar JUnit 5 na suíte inteira foi descartada após erro na extensão do Spring. O JUnit 5 ficou no perfil de unitários, enquanto a integração manteve JUnit 6.
-- **Decisão que exigiu julgamento:** seguir a política da migration V6 e conservar os registros históricos no banco, retirando da cobertura e das listagens os vínculos desativados ao excluir um participante.
-
-Este relato cobre a revisão registrada. O candidato pode complementá-lo com o uso de IA nas etapas anteriores do projeto e com seu próprio relato sobre as decisões.
+- **Ferramentas usadas:** Codex e Claude (Claude Code).
+- **Etapas em que ajudaram:**
+  - **Codex:** análise do código, reprodução de falhas com testes, implementação das correções e verificação das suítes.
+  - **Claude:** melhoria do código e revisão de código.
